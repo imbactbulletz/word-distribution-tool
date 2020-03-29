@@ -52,7 +52,7 @@ public class FileInput implements InputComponent, Runnable {
             }
 
             scanDirectories();
-            if(!isPaused) waitForNextScanCycle();
+            if(!isPaused && isRunning) waitForNextScanCycle();
         }
 
         System.out.println("File input has been shut down.");
