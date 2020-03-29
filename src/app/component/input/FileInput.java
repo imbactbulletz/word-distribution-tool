@@ -4,6 +4,14 @@ import app.global.Config;
 
 public class FileInput implements InputComponent, Runnable {
 
+    private String diskPath;
+    private String[] directoryNames;
+
+    public FileInput(String diskPath, String[] directoryNames) {
+        this.diskPath = diskPath;
+        this.directoryNames = directoryNames;
+    }
+
     /**
      * {@link FileInput} blocks its thread of execution using this object. Blocking mechanism is performed by releasing
      * the lock on this object in a synchronized block. The thread can reacquire the lock after a certain time (in case wait(millis) is called)
@@ -93,5 +101,21 @@ public class FileInput implements InputComponent, Runnable {
             e.printStackTrace();
         }
         System.out.println("Scanned!");
+    }
+
+    public String getDiskPath() {
+        return diskPath;
+    }
+
+    public void setDiskPath(String diskPath) {
+        this.diskPath = diskPath;
+    }
+
+    public String[] getDirectoryNames() {
+        return directoryNames;
+    }
+
+    public void setDirectoryNames(String[] directoryNames) {
+        this.directoryNames = directoryNames;
     }
 }
