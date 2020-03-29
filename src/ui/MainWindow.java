@@ -10,9 +10,10 @@ public class MainWindow extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        Parent tabPane = FXMLLoader.load(getClass().getResource("xml/window_main_layout.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("xml/window_main_layout.fxml"));
         primaryStage.setTitle("Word Distribution Tool");
-        primaryStage.setScene(new Scene(tabPane, 1280, 720));
+        primaryStage.setScene(new Scene(root, 1600, 900));
+        primaryStage.setResizable(false);
         primaryStage.show();
     }
 
