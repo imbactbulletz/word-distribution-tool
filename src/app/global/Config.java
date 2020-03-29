@@ -5,7 +5,7 @@ import java.util.Properties;
 
 public class Config {
 
-    public static final int FILE_INPUT_SLEEP_TIME_MILLIS;
+    public static final long FILE_INPUT_SLEEP_TIME_MILLIS;
 
     public static final String[] DISK_NAMES;
 
