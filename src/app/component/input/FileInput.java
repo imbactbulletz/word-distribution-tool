@@ -1,6 +1,8 @@
 package app.component.input;
 
 import app.global.Config;
+import javafx.application.Platform;
+import ui.controller.MainController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +40,8 @@ public class FileInput implements InputComponent, Runnable {
     @Override
     public void pause() {
         isPaused = true;
+        // in case component is doing a periodic wait
+        wakeUpFileInputComponent();
     }
 
     @Override
@@ -68,6 +72,7 @@ public class FileInput implements InputComponent, Runnable {
 
         while (isRunning) {
             while (isPaused) {
+                notifyUI("Paused");
                 waitToBeStarted();
             }
 
@@ -98,6 +103,7 @@ public class FileInput implements InputComponent, Runnable {
     private void waitForNextScanCycle() {
         synchronized (monitorObject) {
             try {
+                notifyUI("Idle");
                 monitorObject.wait(Config.FILE_INPUT_SLEEP_TIME_MILLIS);
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -108,11 +114,18 @@ public class FileInput implements InputComponent, Runnable {
 
     private void scanDirectories() {
         try {
+            notifyUI("Scanning");
             Thread.sleep(5000L);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         System.out.println("Scanned!");
+    }
+
+    private void notifyUI(String statusMessage) {
+        Platform.runLater(() -> {
+            MainController.INPUT_CONTROLLER.refreshEntry(this, statusMessage);
+        });
     }
 
     public String getDiskPath() {

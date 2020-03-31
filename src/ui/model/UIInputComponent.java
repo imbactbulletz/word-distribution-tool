@@ -7,7 +7,7 @@ public class UIInputComponent {
 
     private final InputComponent inputComponent;
 
-    private String status = "Idle";
+    private String status;
 
     public UIInputComponent(InputComponent inputComponent) {
         this.inputComponent = inputComponent;
