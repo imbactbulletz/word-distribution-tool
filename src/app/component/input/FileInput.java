@@ -43,9 +43,14 @@ public class FileInput implements InputComponent, Runnable {
     @Override
     public void resume() {
         isPaused = false;
+        wakeUpFileInputComponent();
+    }
 
-        // tell the execution thread of File Input component to reacquire
-        // its lock on the monitor object.
+    /**
+     * Tells the execution thread of File Input component to reacquire
+     * its lock on the monitor object.
+     */
+    private void wakeUpFileInputComponent() {
         synchronized (monitorObject) {
             monitorObject.notify();
         }
