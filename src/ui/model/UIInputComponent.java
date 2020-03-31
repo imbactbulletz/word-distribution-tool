@@ -13,12 +13,16 @@ public class UIInputComponent {
         this.inputComponent = inputComponent;
     }
 
-    public String getUiComponentName() {
+    public String getName() {
         String name = null;
         if (inputComponent instanceof FileInput) {
             name = "[FI] " + ((FileInput) inputComponent).getDiskPath();
         }
         return name;
+    }
+
+    public InputComponent getInputComponent() {
+        return inputComponent;
     }
 
     public String getStatus() {

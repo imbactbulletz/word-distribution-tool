@@ -23,23 +23,14 @@ public class InputController {
     @FXML
     private Button addInputButton;
     @FXML
+    private Button removeInputButton;
+    @FXML
     private TableView<UIInputComponent> inputTableView;
 
     public void init() {
         initAddInputButton();
+        initRemoveInputButton();
         initTableView();
-    }
-
-    @SuppressWarnings("unchecked")
-    private void initTableView() {
-        TableColumn<UIInputComponent, String> nameColumn = new TableColumn<>("Name");
-        nameColumn.setCellValueFactory((cellData) -> new SimpleStringProperty(cellData.getValue().getUiComponentName()));
-
-        TableColumn<UIInputComponent, String> statusColumn = new TableColumn<>("Status");
-        statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-
-        inputTableView.getColumns().addAll(nameColumn, statusColumn);
-        inputTableView.setItems(model.getUiInputComponents());
     }
 
     private void initAddInputButton() {
@@ -49,8 +40,37 @@ public class InputController {
         });
     }
 
+    public void initRemoveInputButton() {
+        // disable until a file input is added
+        removeInputButton.setDisable(true);
+
+        removeInputButton.setOnAction((e) -> {
+            UIInputComponent selectedUiInputComponent = inputTableView.getSelectionModel().getSelectedItem();
+
+            selectedUiInputComponent.getInputComponent().shutdown();
+            model.getUiInputComponents().remove(selectedUiInputComponent);
+
+            // disable if no more items are present in the table model
+            if(model.getUiInputComponents().size() == 0) {
+                removeInputButton.setDisable(true);
+            }
+        });
+    }
+
+    @SuppressWarnings("unchecked")
+    private void initTableView() {
+        TableColumn<UIInputComponent, String> nameColumn = new TableColumn<>("Name");
+        nameColumn.setCellValueFactory((cellData) -> new SimpleStringProperty(cellData.getValue().getName()));
+
+        TableColumn<UIInputComponent, String> statusColumn = new TableColumn<>("Status");
+        statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+
+        inputTableView.getColumns().addAll(nameColumn, statusColumn);
+        inputTableView.setItems(model.getUiInputComponents());
+    }
+
     private void addFileInput(String diskPath) {
-        boolean suchFileInputAlreadyExists = model.getUiInputComponents().stream().anyMatch((uiInputComponent -> uiInputComponent.getUiComponentName().contains(diskPath)));
+        boolean suchFileInputAlreadyExists = model.getUiInputComponents().stream().anyMatch((uiInputComponent -> uiInputComponent.getName().contains(diskPath)));
 
         if (suchFileInputAlreadyExists) {
             DialogUtil.showErrorDialog("Add File Input", "File input for disk " + diskPath + "already exists!");
@@ -61,5 +81,6 @@ public class InputController {
         UIInputComponent uiInputComponent = new UIInputComponent(fileInput);
         model.getUiInputComponents().add(uiInputComponent);
         componentExecutorService.submit(fileInput);
+        removeInputButton.setDisable(false);
     }
 }
