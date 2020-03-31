@@ -4,11 +4,15 @@ import app.component.input.FileInput;
 import app.global.Config;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import ui.model.InputControllerModel;
 import ui.model.UIInputComponent;
+import ui.util.DialogUtil;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -40,24 +44,16 @@ public class InputController {
 
     private void initAddInputButton() {
         addInputButton.setOnAction((e) -> {
-            showAddInputDialog();
+            Optional<String> result = DialogUtil.showChoiceDialog(Arrays.asList(Config.DISK_NAMES), "Add File Input", "Choose a disk:");
+            result.ifPresent(this::addFileInput);
         });
-    }
-
-    private void showAddInputDialog() {
-        ChoiceDialog<String> dialog = new ChoiceDialog<>(Config.DISK_NAMES[0], Config.DISK_NAMES);
-        dialog.setTitle("Add File Input");
-        dialog.setHeaderText("Choose a disk:");
-
-        Optional<String> result = dialog.showAndWait();
-        result.ifPresent(this::addFileInput);
     }
 
     private void addFileInput(String diskPath) {
         boolean suchFileInputAlreadyExists = model.getUiInputComponents().stream().anyMatch((uiInputComponent -> uiInputComponent.getUiComponentName().contains(diskPath)));
 
-        if(suchFileInputAlreadyExists) {
-            showErrorDialog(diskPath);
+        if (suchFileInputAlreadyExists) {
+            DialogUtil.showErrorDialog("Add File Input", "File input for disk " + diskPath + "already exists!");
             return;
         }
 
@@ -65,12 +61,5 @@ public class InputController {
         UIInputComponent uiInputComponent = new UIInputComponent(fileInput);
         model.getUiInputComponents().add(uiInputComponent);
         componentExecutorService.submit(fileInput);
-    }
-
-    private void showErrorDialog(String diskPath) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Add File Input");
-        alert.setHeaderText("File Input for disk " + diskPath + " already exists!");
-        alert.showAndWait();
     }
 }
