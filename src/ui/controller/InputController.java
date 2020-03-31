@@ -80,6 +80,7 @@ public class InputController {
         FileInput fileInput = new FileInput(diskPath);
         UIInputComponent uiInputComponent = new UIInputComponent(fileInput);
         model.getUiInputComponents().add(uiInputComponent);
+        inputTableView.getSelectionModel().select(uiInputComponent);
         componentExecutorService.submit(fileInput);
         removeInputButton.setDisable(false);
     }
