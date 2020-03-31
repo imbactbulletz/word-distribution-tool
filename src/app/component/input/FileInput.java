@@ -44,7 +44,8 @@ public class FileInput implements InputComponent, Runnable {
     public void resume() {
         isPaused = false;
 
-        // tell the execution thread of File Input component to reacquire its lock on the monitor object.
+        // tell the execution thread of File Input component to reacquire
+        // its lock on the monitor object.
         synchronized (monitorObject) {
             monitorObject.notify();
         }
@@ -53,10 +54,13 @@ public class FileInput implements InputComponent, Runnable {
     @Override
     public void shutdown() {
         isRunning = false;
+        resume();
     }
 
     @Override
     public void run() {
+        waitToBeStarted();
+
         while (isRunning) {
             while (isPaused) {
                 waitToBeStarted();
