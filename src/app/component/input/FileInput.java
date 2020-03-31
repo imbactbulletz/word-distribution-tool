@@ -2,14 +2,17 @@ package app.component.input;
 
 import app.global.Config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class FileInput implements InputComponent, Runnable {
 
     private String diskPath;
-    private String[] directoryNames;
+    private List<String> directoryNames;
 
-    public FileInput(String diskPath, String[] directoryNames) {
+    public FileInput(String diskPath) {
         this.diskPath = diskPath;
-        this.directoryNames = directoryNames;
+        this.directoryNames = new ArrayList<>();
     }
 
     /**
@@ -109,13 +112,5 @@ public class FileInput implements InputComponent, Runnable {
 
     public void setDiskPath(String diskPath) {
         this.diskPath = diskPath;
-    }
-
-    public String[] getDirectoryNames() {
-        return directoryNames;
-    }
-
-    public void setDirectoryNames(String[] directoryNames) {
-        this.directoryNames = directoryNames;
     }
 }
