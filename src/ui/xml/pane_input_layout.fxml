@@ -30,27 +30,23 @@
              </font>
          </Label>
       </HBox>
-      <TableView fx:id="fileInputsTableView" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="1" GridPane.rowSpan="3">
-        <columns>
-          <TableColumn prefWidth="75.0" text="Name" />
-          <TableColumn prefWidth="75.0" text="Status" />
-        </columns>
+      <TableView fx:id="inputTableView" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="1" GridPane.rowSpan="3">
          <columnResizePolicy>
             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
          </columnResizePolicy>
       </TableView>
       <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="4">
          <children>
-            <Button mnemonicParsing="false" text="Button">
+            <Button fx:id="addInputButton" mnemonicParsing="false" text="Add">
                <HBox.margin>
                   <Insets right="5.0" />
                </HBox.margin></Button>
-            <Button mnemonicParsing="false" text="Button">
+            <Button fx:id="removeInputButton" mnemonicParsing="false" text="Remove">
                <HBox.margin>
                   <Insets right="5.0" />
                </HBox.margin>
             </Button>
-            <Button mnemonicParsing="false" text="Button">
+            <Button fx:id="startPauseInputButton" mnemonicParsing="false" text="Start">
                <HBox.margin>
                   <Insets />
                </HBox.margin>
@@ -64,21 +60,16 @@
                </font>
            </Label>
        </HBox>
-      <ListView prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="6" GridPane.rowSpan="3" />
+      <ListView fx:id="directoriesListView" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="6" GridPane.rowSpan="3" />
        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="9">
            <children>
-               <Button mnemonicParsing="false" text="Button">
+               <Button fx:id="addDirectoryButton" mnemonicParsing="false" text="Add">
                    <HBox.margin>
                        <Insets right="5.0" />
                    </HBox.margin></Button>
-               <Button mnemonicParsing="false" text="Button">
+               <Button fx:id="removeDirectoryButton" mnemonicParsing="false" text="Remove">
                    <HBox.margin>
                        <Insets right="5.0" />
-                   </HBox.margin>
-               </Button>
-               <Button mnemonicParsing="false" text="Button">
-                   <HBox.margin>
-                       <Insets />
                    </HBox.margin>
                </Button>
            </children>
