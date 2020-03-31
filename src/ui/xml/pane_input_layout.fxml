@@ -35,7 +35,7 @@
             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
          </columnResizePolicy>
       </TableView>
-      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="4">
+      <HBox alignment="TOP_CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="4">
          <children>
             <Button fx:id="addInputButton" mnemonicParsing="false" text="Add">
                <HBox.margin>
@@ -52,6 +52,9 @@
                </HBox.margin>
             </Button>
          </children>
+         <GridPane.margin>
+            <Insets top="10.0" />
+         </GridPane.margin>
       </HBox>
        <HBox alignment="CENTER" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="5">
            <Label text="Directories">
@@ -61,7 +64,7 @@
            </Label>
        </HBox>
       <ListView fx:id="directoriesListView" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="6" GridPane.rowSpan="3" />
-       <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="9">
+       <HBox alignment="TOP_CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="9">
            <children>
                <Button fx:id="addDirectoryButton" mnemonicParsing="false" text="Add">
                    <HBox.margin>
@@ -73,6 +76,9 @@
                    </HBox.margin>
                </Button>
            </children>
+         <GridPane.margin>
+            <Insets top="10.0" />
+         </GridPane.margin>
        </HBox>
    </children>
    <opaqueInsets>
