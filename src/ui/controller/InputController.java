@@ -51,12 +51,6 @@ public class InputController {
             UIInputComponent selectedUiInputComponent = inputTableView.getSelectionModel().getSelectedItem();
 
             selectedUiInputComponent.getInputComponent().shutdown();
-            model.getUiInputComponents().remove(selectedUiInputComponent);
-
-            // disable if no more items are present in the table model
-            if (model.getUiInputComponents().size() == 0) {
-                removeInputButton.setDisable(true);
-            }
         });
     }
 
@@ -65,7 +59,7 @@ public class InputController {
             UIInputComponent selectedItem = inputTableView.getSelectionModel().getSelectedItem();
 
             if (selectedItem.getStatus() == null || selectedItem.getStatus().equals("Paused")) {
-               selectedItem.getInputComponent().resume();
+                selectedItem.getInputComponent().resume();
             } else {
                 selectedItem.getInputComponent().pause();
             }
@@ -87,7 +81,9 @@ public class InputController {
         });
 
         inputTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            setStartPauseInputButtonTextByStatus(newSelection.getStatus());
+            if (newSelection != null) {
+                setStartPauseInputButtonTextByStatus(newSelection.getStatus());
+            }
         });
 
         inputTableView.getColumns().addAll(nameColumn, statusColumn);
@@ -96,7 +92,7 @@ public class InputController {
 
     private void setStartPauseInputButtonTextByStatus(String status) {
         String text;
-        if(status == null || status.equals("Paused")) {
+        if (status == null || status.equals("Paused")) {
             text = "Start";
         } else {
             text = "Pause";
@@ -124,14 +120,28 @@ public class InputController {
         Optional<UIInputComponent> uiInputComponentOptional = model.getUiInputComponents().stream()
                 .filter((uiInputComponent1 -> uiInputComponent1.getInputComponent() == inputComponent)).findFirst();
 
-        uiInputComponentOptional.ifPresent((uiInputComponent)-> {
+        uiInputComponentOptional.ifPresent((uiInputComponent) -> {
             uiInputComponent.setStatus(statusMessage);
 
             if (inputTableView.getSelectionModel().getSelectedItem() == uiInputComponent) {
-               setStartPauseInputButtonTextByStatus(statusMessage);
+                setStartPauseInputButtonTextByStatus(statusMessage);
             }
 
             inputTableView.refresh();
         });
+    }
+
+    public void removeComponent(InputComponent inputComponent) {
+        Optional<UIInputComponent> uiInputComponentOptional = model.getUiInputComponents().stream()
+                .filter((uiInputComponent1 -> uiInputComponent1.getInputComponent() == inputComponent)).findFirst();
+
+        uiInputComponentOptional.ifPresent((uiInputComponent -> {
+            model.getUiInputComponents().remove(uiInputComponent);
+
+            // disable if no more items are present in the table model
+            if (model.getUiInputComponents().size() == 0) {
+                removeInputButton.setDisable(true);
+            }
+        }));
     }
 }

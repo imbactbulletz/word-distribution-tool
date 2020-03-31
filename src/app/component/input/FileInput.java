@@ -9,33 +9,30 @@ import java.util.List;
 
 public class FileInput implements InputComponent, Runnable {
 
-    private String diskPath;
-    private List<String> directoryNames;
-
-    public FileInput(String diskPath) {
-        this.diskPath = diskPath;
-        this.directoryNames = new ArrayList<>();
-    }
-
     /**
      * {@link FileInput} blocks its thread of execution using this object. Blocking mechanism is performed by releasing
      * the lock on this object in a synchronized block. The thread can reacquire the lock after a certain time (in case wait(millis) is called)
      * or by having another thread call notify() on this object.
      */
     private final Object monitorObject = new Object();
-
+    private String diskPath;
+    private List<String> directoryNames;
     /**
      * Another thread sets this flag to tell {@link FileInput} to discontinue any ongoing work and
      * stop its execution for an unspecified amount of time.
      */
     private volatile boolean isPaused = true;
-
-
     /**
      * Another thread sets this flag to indicate whether {@link FileInput} should discontinue ongoing work and end its
      * execution permanently.
      */
     private volatile boolean isRunning = true;
+
+
+    public FileInput(String diskPath) {
+        this.diskPath = diskPath;
+        this.directoryNames = new ArrayList<>();
+    }
 
     @Override
     public void pause() {
@@ -77,9 +74,10 @@ public class FileInput implements InputComponent, Runnable {
             }
 
             scanDirectories();
-            if(!isPaused && isRunning) waitForNextScanCycle();
+            if (!isPaused && isRunning) waitForNextScanCycle();
         }
 
+        notifyUIOfComponentFinished(this);
         System.out.println("File input has been shut down.");
     }
 
@@ -125,6 +123,12 @@ public class FileInput implements InputComponent, Runnable {
     private void notifyUI(String statusMessage) {
         Platform.runLater(() -> {
             MainController.INPUT_CONTROLLER.refreshEntry(this, statusMessage);
+        });
+    }
+
+    private void notifyUIOfComponentFinished(InputComponent inputComponent) {
+        Platform.runLater(() -> {
+            MainController.INPUT_CONTROLLER.removeComponent(inputComponent);
         });
     }
 
