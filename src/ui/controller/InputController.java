@@ -55,6 +55,7 @@ public class InputController {
     }
 
     private void initStartPauseInputButton() {
+        startPauseInputButton.setDisable(true);
         startPauseInputButton.setOnAction((e) -> {
             UIInputComponent selectedItem = inputTableView.getSelectionModel().getSelectedItem();
 
@@ -114,6 +115,7 @@ public class InputController {
         inputTableView.getSelectionModel().select(uiInputComponent);
         componentExecutorService.submit(fileInput);
         removeInputButton.setDisable(false);
+        startPauseInputButton.setDisable(false);
     }
 
     public void refreshEntry(InputComponent inputComponent, String statusMessage) {
@@ -141,6 +143,7 @@ public class InputController {
             // disable if no more items are present in the table model
             if (model.getUiInputComponents().size() == 0) {
                 removeInputButton.setDisable(true);
+                startPauseInputButton.setDisable(true);
             }
         }));
     }
