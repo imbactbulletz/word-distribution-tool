@@ -4,14 +4,16 @@ import app.component.input.FileInput;
 import app.component.input.InputComponent;
 import app.global.Config;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.Node;
+import javafx.scene.control.*;
+import javafx.stage.Stage;
 import ui.model.InputControllerModel;
 import ui.model.UIInputComponent;
 import ui.util.DialogUtil;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -29,11 +31,21 @@ public class InputController {
     @FXML
     private TableView<UIInputComponent> inputTableView;
 
+    @FXML
+    private Button addDirectoryButton;
+    @FXML
+    private ListView<File> directoriesListView;
+
     public void init() {
+        // file input controls
         initAddInputButton();
         initRemoveInputButton();
         initStartPauseInputButton();
         initTableView();
+
+        // directory controls
+        initAddDirectoryButton();
+        initDirectoriesListView();
     }
 
     private void initAddInputButton() {
@@ -84,6 +96,10 @@ public class InputController {
         inputTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 setStartPauseInputButtonTextByStatus(newSelection.getStatus());
+
+                if (newSelection.getInputComponent() instanceof FileInput) {
+                    directoriesListView.setItems(FXCollections.observableList(((FileInput) newSelection.getInputComponent()).getDirectories()));
+                }
             }
         });
 
@@ -116,6 +132,7 @@ public class InputController {
         componentExecutorService.submit(fileInput);
         removeInputButton.setDisable(false);
         startPauseInputButton.setDisable(false);
+        addDirectoryButton.setDisable(false);
     }
 
     public void refreshEntry(InputComponent inputComponent, String statusMessage) {
@@ -144,7 +161,44 @@ public class InputController {
             if (model.getUiInputComponents().size() == 0) {
                 removeInputButton.setDisable(true);
                 startPauseInputButton.setDisable(true);
+                addDirectoryButton.setDisable(true);
+                directoriesListView.setItems(null);
             }
         }));
+    }
+
+    ////////////////////// DIRECTORY CONTROLS
+
+    private void initAddDirectoryButton() {
+        if (model.getUiInputComponents().size() == 0) {
+            addDirectoryButton.setDisable(true);
+        }
+
+        addDirectoryButton.setOnAction((e) -> {
+            InputComponent selectedComponent = inputTableView.getSelectionModel().getSelectedItem().getInputComponent();
+
+            if (selectedComponent instanceof FileInput) {
+                String diskPath = ((FileInput) selectedComponent).getDiskPath();
+                String absoluteDiskPath = System.getProperty("user.dir") + File.separator + "src" + File.separator + diskPath;
+                Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
+                File directory = DialogUtil.showDirectoryChooser(absoluteDiskPath, stage);
+                ((FileInput) selectedComponent).addDirectory(directory);
+                directoriesListView.setItems(FXCollections.observableList(((FileInput) selectedComponent).getDirectories()));
+            }
+        });
+    }
+
+    private void initDirectoriesListView() {
+        directoriesListView.setCellFactory(callback -> new ListCell<>() {
+            @Override
+            protected void updateItem(File item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item.getName());
+                }
+            }
+        });
     }
 }

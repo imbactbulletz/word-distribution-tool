@@ -2,7 +2,11 @@ package ui.util;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ChoiceDialog;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Window;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,5 +24,11 @@ public class DialogUtil {
         alert.setTitle(title);
         alert.setHeaderText(headerText);
         alert.showAndWait();
+    }
+
+    public static File showDirectoryChooser(String path, Window parentWindow) {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setInitialDirectory(Paths.get(path).toFile());
+        return directoryChooser.showDialog(parentWindow);
     }
 }

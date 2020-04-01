@@ -4,6 +4,7 @@ import app.global.Config;
 import javafx.application.Platform;
 import ui.controller.MainController;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +17,7 @@ public class FileInput implements InputComponent, Runnable {
      */
     private final Object monitorObject = new Object();
     private String diskPath;
-    private List<String> directoryNames;
+    private volatile List<File> directories;
     /**
      * Another thread sets this flag to tell {@link FileInput} to discontinue any ongoing work and
      * stop its execution for an unspecified amount of time.
@@ -31,7 +32,7 @@ public class FileInput implements InputComponent, Runnable {
 
     public FileInput(String diskPath) {
         this.diskPath = diskPath;
-        this.directoryNames = new ArrayList<>();
+        this.directories = new ArrayList<>();
     }
 
     @Override
@@ -111,13 +112,15 @@ public class FileInput implements InputComponent, Runnable {
     }
 
     private void scanDirectories() {
-        try {
-            notifyUI("Scanning");
-            Thread.sleep(5000L);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        for(File directory : directories) {
+            notifyUI("Scanning " + directory.getName());
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
-        System.out.println("Scanned!");
+
     }
 
     private void notifyUI(String statusMessage) {
@@ -136,7 +139,11 @@ public class FileInput implements InputComponent, Runnable {
         return diskPath;
     }
 
-    public void setDiskPath(String diskPath) {
-        this.diskPath = diskPath;
+    public void addDirectory(File directory) {
+        directories.add(directory);
+    }
+
+    public List<File> getDirectories() {
+        return directories;
     }
 }
