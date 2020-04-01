@@ -115,7 +115,7 @@ public class FileInput implements InputComponent, Runnable {
         for(File directory : directories) {
             notifyUI("Scanning " + directory.getName());
             try {
-                Thread.sleep(200);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

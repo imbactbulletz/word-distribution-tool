@@ -15,6 +15,7 @@ import ui.util.DialogUtil;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,6 +35,8 @@ public class InputController {
     @FXML
     private Button addDirectoryButton;
     @FXML
+    private Button removeDirectoryButton;
+    @FXML
     private ListView<File> directoriesListView;
 
     public void init() {
@@ -45,6 +48,7 @@ public class InputController {
 
         // directory controls
         initAddDirectoryButton();
+        initRemoveDirectoryButton();
         initDirectoriesListView();
     }
 
@@ -99,6 +103,11 @@ public class InputController {
 
                 if (newSelection.getInputComponent() instanceof FileInput) {
                     directoriesListView.setItems(FXCollections.observableList(((FileInput) newSelection.getInputComponent()).getDirectories()));
+                    if (((FileInput) newSelection.getInputComponent()).getDirectories().size() == 0) {
+                        removeDirectoryButton.setDisable(true);
+                    } else {
+                        removeDirectoryButton.setDisable(false);
+                    }
                 }
             }
         });
@@ -162,6 +171,7 @@ public class InputController {
                 removeInputButton.setDisable(true);
                 startPauseInputButton.setDisable(true);
                 addDirectoryButton.setDisable(true);
+                removeDirectoryButton.setDisable(true);
                 directoriesListView.setItems(null);
             }
         }));
@@ -184,6 +194,34 @@ public class InputController {
                 File directory = DialogUtil.showDirectoryChooser(absoluteDiskPath, stage);
                 ((FileInput) selectedComponent).addDirectory(directory);
                 directoriesListView.setItems(FXCollections.observableList(((FileInput) selectedComponent).getDirectories()));
+                // select first item since listView doesn't select it automatically
+                directoriesListView.getSelectionModel().select(0);
+                removeDirectoryButton.setDisable(false);
+            }
+        });
+    }
+
+    private void initRemoveDirectoryButton() {
+        removeDirectoryButton.setDisable(true);
+        removeDirectoryButton.setOnAction((e) -> {
+            UIInputComponent selectedUIInputComponent = inputTableView.getSelectionModel().getSelectedItem();
+            File selectedDirectory = directoriesListView.getSelectionModel().getSelectedItem();
+
+            if (selectedUIInputComponent != null && selectedDirectory != null && selectedUIInputComponent.getInputComponent() instanceof FileInput) {
+                    List<File> directoriesList = ((FileInput) selectedUIInputComponent.getInputComponent()).getDirectories();
+                    int selectedDirectoryIndex = directoriesList.indexOf(selectedDirectory);
+                    if(directoriesList.size() > 1) {
+                        if(selectedDirectoryIndex == 0) {
+                            directoriesListView.getSelectionModel().select(1);
+                        } else {
+                            directoriesListView.getSelectionModel().select(selectedDirectoryIndex - 1);
+                        }
+                    } else {
+                        removeDirectoryButton.setDisable(true);
+                    }
+
+                    directoriesList.remove(selectedDirectory);
+                    directoriesListView.refresh();
             }
         });
     }
