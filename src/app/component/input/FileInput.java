@@ -163,22 +163,32 @@ public class FileInput implements InputComponent, Runnable {
     }
 
     private List<FileInfo> readFiles(List<File> files) {
-        List<FileInfo> readFiles = new ArrayList<>();
+        List<FileInfo> fileInfos = new ArrayList<>();
+        List<File> readFiles = new ArrayList<>();
 
         for (File file : files) {
             notifyUI("Reading " + file.getName());
             Future<FileInfo> resultFuture = Executors.INPUT.submit(new FileInputReadWorker(file));
             try {
-                if (isPaused || !isRunning) return null;
+                if (isPaused || !isRunning) {
+                    // remove all unread files from cache so they can be read next time
+                    List<File> unreadFiles = new ArrayList<>(files);
+                    unreadFiles.removeAll(readFiles);
+                    for(File unreadFile : unreadFiles) {
+                        cache.remove(unreadFile);
+                    }
+                    return null;
+                }
 
                 FileInfo fileInfo = resultFuture.get();
-                readFiles.add(fileInfo);
+                fileInfos.add(fileInfo);
+                readFiles.add(file);
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
         }
 
-        return readFiles;
+        return fileInfos;
     }
 
     private List<File> getChangedFiles(List<File> files) {
