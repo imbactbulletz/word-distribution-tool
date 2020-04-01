@@ -1,23 +1,35 @@
 package app.component.input;
 
 import app.global.Config;
+import app.global.Executors;
 import javafx.application.Platform;
 import ui.controller.MainController;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 public class FileInput implements InputComponent, Runnable {
 
+    private final Object monitorObject = new Object();
     /**
      * {@link FileInput} blocks its thread of execution using this object. Blocking mechanism is performed by releasing
      * the lock on this object in a synchronized block. The thread can reacquire the lock after a certain time (in case wait(millis) is called)
      * or by having another thread call notify() on this object.
      */
-    private final Object monitorObject = new Object();
     private String diskPath;
-    private volatile List<File> directories;
+    private List<File> directories;
+    private Map<File, Long> cache = new HashMap<>();
     /**
      * Another thread sets this flag to tell {@link FileInput} to discontinue any ongoing work and
      * stop its execution for an unspecified amount of time.
@@ -32,7 +44,7 @@ public class FileInput implements InputComponent, Runnable {
 
     public FileInput(String diskPath) {
         this.diskPath = diskPath;
-        this.directories = new ArrayList<>();
+        this.directories = new CopyOnWriteArrayList<>();
     }
 
     @Override
@@ -74,7 +86,15 @@ public class FileInput implements InputComponent, Runnable {
                 waitToBeStarted();
             }
 
-            scanDirectories();
+            if (isPaused || !isRunning) continue;
+            List<File> filesInDirectories = scanDirectories();
+            if (isPaused || !isRunning) continue;
+            List<File> changedFiles = getChangedFiles(filesInDirectories);
+            if (isPaused || !isRunning) continue;
+            List<FileInfo> readFiles = readFiles(changedFiles);
+
+            // scan all files
+            // check if they should be scanned (if they are not currently in the cache or have same last date modified)
             if (!isPaused && isRunning) waitForNextScanCycle();
         }
 
@@ -111,17 +131,71 @@ public class FileInput implements InputComponent, Runnable {
         }
     }
 
-    private void scanDirectories() {
-        for(File directory : directories) {
+    private List<File> scanDirectories() {
+        List<File> filesForInspection = new ArrayList<>();
+
+        for (File directory : directories) {
+            if (isPaused && isRunning) {
+                return new ArrayList<>();
+            }
+
             notifyUI("Scanning " + directory.getName());
+            List<File> files = scanDirectory(directory);
+
+            if (files != null) {
+                filesForInspection.addAll(files);
+            }
+        }
+
+        return filesForInspection;
+    }
+
+    private List<File> scanDirectory(File directory) {
+        try {
+            return Files.walk(Paths.get(directory.getPath()))
+                    .filter(Files::isRegularFile)
+                    .map(Path::toFile)
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private List<FileInfo> readFiles(List<File> files) {
+        List<FileInfo> readFiles = new ArrayList<>();
+
+        for (File file : files) {
+            notifyUI("Reading " + file.getName());
+            Future<FileInfo> resultFuture = Executors.INPUT.submit(new FileInputReadWorker(file));
             try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
+                if (isPaused || !isRunning) return null;
+
+                FileInfo fileInfo = resultFuture.get();
+                readFiles.add(fileInfo);
+            } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
         }
 
+        return readFiles;
     }
+
+    private List<File> getChangedFiles(List<File> files) {
+        List<File> changedFiles = new ArrayList<>();
+
+        for (File file : files) {
+            if (isPaused || !isRunning) return new ArrayList<>();
+
+            if (cache.get(file) == null || cache.get(file) != file.lastModified()) {
+                changedFiles.add(file);
+                cache.put(file, file.lastModified());
+            }
+        }
+
+        return changedFiles;
+    }
+
 
     private void notifyUI(String statusMessage) {
         Platform.runLater(() -> {
@@ -141,6 +215,10 @@ public class FileInput implements InputComponent, Runnable {
 
     public void addDirectory(File directory) {
         directories.add(directory);
+    }
+
+    public void removeDirectory(File directory) {
+        directories.remove(directory);
     }
 
     public List<File> getDirectories() {
