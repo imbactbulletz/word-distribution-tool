@@ -1,5 +1,6 @@
 package app.component.input;
 
+import app.component.cruncher.CruncherComponent;
 import app.global.Config;
 import app.global.Executors;
 import javafx.application.Platform;
@@ -15,32 +16,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 public class FileInput implements InputComponent, Runnable {
 
     private final Object monitorObject = new Object();
-    /**
-     * {@link FileInput} blocks its thread of execution using this object. Blocking mechanism is performed by releasing
-     * the lock on this object in a synchronized block. The thread can reacquire the lock after a certain time (in case wait(millis) is called)
-     * or by having another thread call notify() on this object.
-     */
+
+    private final Object workerMonitorObject = new Object();
+
     private String diskPath;
+
     private List<File> directories;
+
     private Map<File, Long> cache = new HashMap<>();
-    /**
-     * Another thread sets this flag to tell {@link FileInput} to discontinue any ongoing work and
-     * stop its execution for an unspecified amount of time.
-     */
+
+    private List<CruncherComponent> cruncherComponents = new CopyOnWriteArrayList<>();
+
+    private List<File> filesForReading = new CopyOnWriteArrayList<>();
+
     private volatile boolean isPaused = true;
-    /**
-     * Another thread sets this flag to indicate whether {@link FileInput} should discontinue ongoing work and end its
-     * execution permanently.
-     */
+
     private volatile boolean isRunning = true;
 
+    private volatile boolean hasActiveWorker = false;
 
     public FileInput(String diskPath) {
         this.diskPath = diskPath;
@@ -60,10 +58,6 @@ public class FileInput implements InputComponent, Runnable {
         wakeUpFileInputComponent();
     }
 
-    /**
-     * Tells the execution thread of File Input component to reacquire
-     * its lock on the monitor object.
-     */
     private void wakeUpFileInputComponent() {
         synchronized (monitorObject) {
             monitorObject.notify();
@@ -91,20 +85,20 @@ public class FileInput implements InputComponent, Runnable {
             if (isPaused || !isRunning) continue;
             List<File> changedFiles = getChangedFiles(filesInDirectories);
             if (isPaused || !isRunning) continue;
-            List<FileInfo> readFiles = readFiles(changedFiles);
-
+            if (changedFiles.size() > 0) scheduleFilesForReading(changedFiles);
             // scan all files
             // check if they should be scanned (if they are not currently in the cache or have same last date modified)
             if (!isPaused && isRunning) waitForNextScanCycle();
+        }
+
+        if (hasActiveWorker) {
+            waitForWorkerToFinish();
         }
 
         notifyUIOfComponentFinished(this);
         System.out.println("File input has been shut down.");
     }
 
-    /**
-     * Blocks thread from further execution by releasing the lock on the monitor object.
-     */
     private void waitToBeStarted() {
         synchronized (monitorObject) {
             try {
@@ -116,9 +110,6 @@ public class FileInput implements InputComponent, Runnable {
         }
     }
 
-    /**
-     * Releases the lock on monitor object for an amount of time.
-     */
     private void waitForNextScanCycle() {
         synchronized (monitorObject) {
             try {
@@ -158,37 +149,16 @@ public class FileInput implements InputComponent, Runnable {
                     .collect(Collectors.toList());
         } catch (IOException e) {
             e.printStackTrace();
-            return null;
+            return new ArrayList<>();
         }
     }
 
-    private List<FileInfo> readFiles(List<File> files) {
-        List<FileInfo> fileInfos = new ArrayList<>();
-        List<File> readFiles = new ArrayList<>();
-
-        for (File file : files) {
-            notifyUI("Reading " + file.getName());
-            Future<FileInfo> resultFuture = Executors.INPUT.submit(new FileInputReadWorker(file));
-            try {
-                if (isPaused || !isRunning) {
-                    // remove all unread files from cache so they can be read next time
-                    List<File> unreadFiles = new ArrayList<>(files);
-                    unreadFiles.removeAll(readFiles);
-                    for(File unreadFile : unreadFiles) {
-                        cache.remove(unreadFile);
-                    }
-                    return null;
-                }
-
-                FileInfo fileInfo = resultFuture.get();
-                fileInfos.add(fileInfo);
-                readFiles.add(file);
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
+    private void scheduleFilesForReading(List<File> files) {
+        filesForReading.addAll(files);
+        if (!hasActiveWorker) {
+            hasActiveWorker = true;
+            Executors.INPUT.submit(new FileInputReadWorker(this, filesForReading, workerMonitorObject));
         }
-
-        return fileInfos;
     }
 
     private List<File> getChangedFiles(List<File> files) {
@@ -206,10 +176,19 @@ public class FileInput implements InputComponent, Runnable {
         return changedFiles;
     }
 
+    private void waitForWorkerToFinish() {
+        synchronized (workerMonitorObject) {
+            try {
+                workerMonitorObject.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     private void notifyUI(String statusMessage) {
         Platform.runLater(() -> {
-            MainController.INPUT_CONTROLLER.refreshEntry(this, statusMessage);
+            MainController.INPUT_CONTROLLER.refreshEntryStatus(this, statusMessage);
         });
     }
 
@@ -228,10 +207,24 @@ public class FileInput implements InputComponent, Runnable {
     }
 
     public void removeDirectory(File directory) {
+        List<File> directoryFiles = scanDirectory(directory);
+
+        for (File file : directoryFiles) {
+            cache.remove(file);
+        }
+
         directories.remove(directory);
     }
 
     public List<File> getDirectories() {
         return directories;
+    }
+
+    public List<CruncherComponent> getCruncherComponents() {
+        return cruncherComponents;
+    }
+
+    public void setHasActiveWorker(boolean hasActiveWorker) {
+        this.hasActiveWorker = hasActiveWorker;
     }
 }

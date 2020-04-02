@@ -144,7 +144,7 @@ public class InputController {
         addDirectoryButton.setDisable(false);
     }
 
-    public void refreshEntry(InputComponent inputComponent, String statusMessage) {
+    public void refreshEntryStatus(InputComponent inputComponent, String statusMessage) {
         Optional<UIInputComponent> uiInputComponentOptional = model.getUiInputComponents().stream()
                 .filter((uiInputComponent1 -> uiInputComponent1.getInputComponent() == inputComponent)).findFirst();
 
@@ -220,7 +220,7 @@ public class InputController {
                         removeDirectoryButton.setDisable(true);
                     }
 
-                    directoriesList.remove(selectedDirectory);
+                    ((FileInput) selectedUIInputComponent.getInputComponent()).removeDirectory(selectedDirectory);
                     directoriesListView.refresh();
             }
         });
