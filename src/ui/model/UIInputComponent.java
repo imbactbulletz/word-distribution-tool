@@ -2,12 +2,15 @@ package ui.model;
 
 import app.component.input.FileInput;
 import app.component.input.InputComponent;
+import app.component.input.InputComponentState;
 
 public class UIInputComponent {
 
     private final InputComponent inputComponent;
 
-    private String status;
+    private String statusMessage;
+
+    private InputComponentState state;
 
     public UIInputComponent(InputComponent inputComponent) {
         this.inputComponent = inputComponent;
@@ -25,11 +28,19 @@ public class UIInputComponent {
         return inputComponent;
     }
 
-    public String getStatus() {
-        return status;
+    public String getStatusMessage() {
+        return statusMessage;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setStatusMessage(String statusMessage) {
+        this.statusMessage = statusMessage;
+    }
+
+    public InputComponentState getState() {
+        return state;
+    }
+
+    public void setState(InputComponentState state) {
+        this.state = state;
     }
 }

@@ -34,6 +34,8 @@ public class FileInput implements InputComponent, Runnable {
 
     private List<File> filesForReading = new CopyOnWriteArrayList<>();
 
+    private InputComponentState state;
+
     private volatile boolean isPaused = true;
 
     private volatile boolean isRunning = true;
@@ -76,8 +78,7 @@ public class FileInput implements InputComponent, Runnable {
 
         while (isRunning) {
             while (isPaused) {
-                notifyUI("Paused");
-                waitToBeStarted();
+                waitToBeResumed();
             }
 
             if (isPaused || !isRunning) continue;
@@ -102,7 +103,26 @@ public class FileInput implements InputComponent, Runnable {
     private void waitToBeStarted() {
         synchronized (monitorObject) {
             try {
+                state = InputComponentState.NOT_STARTED;
+                notifyUIOfCurrentState();
                 monitorObject.wait();
+                state = InputComponentState.WORKING;
+                notifyUIOfCurrentState();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                System.err.println("[FileInput] Interrupted while waiting to be started.");
+            }
+        }
+    }
+
+    private void waitToBeResumed() {
+        synchronized (monitorObject) {
+            try {
+                state = InputComponentState.PAUSED;
+                notifyUIOfCurrentState();
+                monitorObject.wait();
+                state = InputComponentState.WORKING;
+                notifyUIOfCurrentState();
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 System.err.println("[FileInput] Interrupted while waiting to be started.");
@@ -113,7 +133,6 @@ public class FileInput implements InputComponent, Runnable {
     private void waitForNextScanCycle() {
         synchronized (monitorObject) {
             try {
-                notifyUI("Idle");
                 monitorObject.wait(Config.FILE_INPUT_SLEEP_TIME_MILLIS);
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -130,7 +149,6 @@ public class FileInput implements InputComponent, Runnable {
                 return new ArrayList<>();
             }
 
-            notifyUI("Scanning " + directory.getName());
             List<File> files = scanDirectory(directory);
 
             if (files != null) {
@@ -186,9 +204,9 @@ public class FileInput implements InputComponent, Runnable {
         }
     }
 
-    private void notifyUI(String statusMessage) {
+    private void notifyUIOfCurrentState() {
         Platform.runLater(() -> {
-            MainController.INPUT_CONTROLLER.refreshEntryStatus(this, statusMessage);
+            MainController.INPUT_CONTROLLER.refreshEntryState(this, state);
         });
     }
 

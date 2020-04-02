@@ -44,6 +44,7 @@ public class FileInputReadWorker implements Runnable {
             Executors.INPUT.submit(new FileInputReadWorker(fileInput, files, monitorObject));
         } else {
             fileInput.setHasActiveWorker(false);
+            notifyUI("Idle");
             // finished, tell file input component that it can finish if it is waiting
             synchronized (monitorObject) {
                 monitorObject.notify();

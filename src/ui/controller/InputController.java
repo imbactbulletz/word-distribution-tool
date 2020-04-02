@@ -2,6 +2,7 @@ package ui.controller;
 
 import app.component.input.FileInput;
 import app.component.input.InputComponent;
+import app.component.input.InputComponentState;
 import app.global.Config;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -75,9 +76,9 @@ public class InputController {
         startPauseInputButton.setOnAction((e) -> {
             UIInputComponent selectedItem = inputTableView.getSelectionModel().getSelectedItem();
 
-            if (selectedItem.getStatus() == null || selectedItem.getStatus().equals("Paused")) {
+            if (selectedItem.getState() == InputComponentState.NOT_STARTED || selectedItem.getState() == InputComponentState.PAUSED) {
                 selectedItem.getInputComponent().resume();
-            } else {
+            } else if(selectedItem.getState() == InputComponentState.WORKING) {
                 selectedItem.getInputComponent().pause();
             }
         });
@@ -90,16 +91,16 @@ public class InputController {
 
         TableColumn<UIInputComponent, String> statusColumn = new TableColumn<>("Status");
         statusColumn.setCellValueFactory((cellData) -> {
-            if (cellData.getValue().getStatus() == null) {
+            if (cellData.getValue().getStatusMessage() == null) {
                 return new SimpleStringProperty("Idle");
             } else {
-                return new SimpleStringProperty(cellData.getValue().getStatus());
+                return new SimpleStringProperty(cellData.getValue().getStatusMessage());
             }
         });
 
         inputTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
-                setStartPauseInputButtonTextByStatus(newSelection.getStatus());
+                setStartPauseInputButtonTextByState(newSelection.getState());
 
                 if (newSelection.getInputComponent() instanceof FileInput) {
                     directoriesListView.setItems(FXCollections.observableList(((FileInput) newSelection.getInputComponent()).getDirectories()));
@@ -116,14 +117,12 @@ public class InputController {
         inputTableView.setItems(model.getUiInputComponents());
     }
 
-    private void setStartPauseInputButtonTextByStatus(String status) {
-        String text;
-        if (status == null || status.equals("Paused")) {
-            text = "Start";
-        } else {
-            text = "Pause";
+    private void setStartPauseInputButtonTextByState(InputComponentState state) {
+        if(state == InputComponentState.NOT_STARTED || state == InputComponentState.PAUSED) {
+            startPauseInputButton.setText("Start");
+        } else if (state == InputComponentState.WORKING) {
+            startPauseInputButton.setText("Pause");
         }
-        startPauseInputButton.setText(text);
     }
 
     private void addFileInput(String diskPath) {
@@ -149,13 +148,21 @@ public class InputController {
                 .filter((uiInputComponent1 -> uiInputComponent1.getInputComponent() == inputComponent)).findFirst();
 
         uiInputComponentOptional.ifPresent((uiInputComponent) -> {
-            uiInputComponent.setStatus(statusMessage);
-
-            if (inputTableView.getSelectionModel().getSelectedItem() == uiInputComponent) {
-                setStartPauseInputButtonTextByStatus(statusMessage);
-            }
-
+            uiInputComponent.setStatusMessage(statusMessage);
             inputTableView.refresh();
+        });
+    }
+
+    public void refreshEntryState(InputComponent inputComponent, InputComponentState inputComponentState) {
+        Optional<UIInputComponent> uiInputComponentOptional = model.getUiInputComponents().stream()
+                .filter((uiInputComponent1 -> uiInputComponent1.getInputComponent() == inputComponent)).findFirst();
+
+        uiInputComponentOptional.ifPresent((uiInputComponent) -> {
+            uiInputComponent.setState(inputComponentState);
+
+            if(inputTableView.getSelectionModel().getSelectedItem() == uiInputComponent) {
+                setStartPauseInputButtonTextByState(inputComponentState);
+            }
         });
     }
 
