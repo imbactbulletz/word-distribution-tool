@@ -1,4 +1,4 @@
-package ui.model;
+package ui.model.input;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

@@ -11,8 +11,8 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-import ui.model.InputControllerModel;
-import ui.model.UIInputComponent;
+import ui.model.input.InputControllerModel;
+import ui.model.input.UIInputComponent;
 import ui.util.DialogUtil;
 
 import java.io.File;

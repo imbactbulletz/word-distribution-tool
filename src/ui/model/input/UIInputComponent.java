@@ -1,4 +1,4 @@
-package ui.model;
+package ui.model.input;
 
 import app.component.input.FileInput;
 import app.component.input.InputComponent;
