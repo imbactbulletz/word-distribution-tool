@@ -12,6 +12,7 @@ import ui.model.cruncher.UICruncherComponent;
 import ui.util.DialogUtil;
 
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 
@@ -29,6 +30,7 @@ public class CruncherController {
 
     private Consumer<UICruncherComponent> onTableItemSelectedListener;
 
+    private BiConsumer<UICruncherComponent, Boolean> onLinkUnlinkButtonClicked;
     public void init() {
         initAddCruncherButton();
         initRemoveCruncherButton();
@@ -71,7 +73,11 @@ public class CruncherController {
                 if (model.getCruncherComponents().size() == 0) {
                     removeCruncherButton.setDisable(true);
                     // notify main controller cruncher table is empty
-                    onTableItemSelectedListener.accept(null);
+                    if(onTableItemSelectedListener != null) {
+                        onTableItemSelectedListener.accept(null);
+                    } else {
+                        System.err.println("Table item selected listener must not be null.");
+                    }
                 }
             }
         });
