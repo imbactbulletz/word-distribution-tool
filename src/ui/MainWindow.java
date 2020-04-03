@@ -1,5 +1,6 @@
 package ui;
 
+import com.sun.tools.javac.Main;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -25,6 +26,7 @@ public class MainWindow extends Application {
         gridPane.add(inputPane, 0, 0, 1, 3);
 
         fxmlLoader = new FXMLLoader(getClass().getResource("xml/pane_cruncher_layout.fxml"));
+        fxmlLoader.setController(MainController.CRUNCHER_CONTROLLER);
         Parent cruncherPane = fxmlLoader.load();
         gridPane.add(cruncherPane,1,0,1,3);
 
