@@ -76,9 +76,9 @@ public class InputController {
         startPauseInputButton.setOnAction((e) -> {
             UIInputComponent selectedItem = inputTableView.getSelectionModel().getSelectedItem();
 
-            if (selectedItem.getState() == InputComponentState.NOT_STARTED || selectedItem.getState() == InputComponentState.PAUSED) {
+            if (selectedItem.getInputComponent().getState() == InputComponentState.NOT_STARTED || selectedItem.getInputComponent().getState() == InputComponentState.PAUSED) {
                 selectedItem.getInputComponent().resume();
-            } else if(selectedItem.getState() == InputComponentState.WORKING) {
+            } else if(selectedItem.getInputComponent().getState() == InputComponentState.WORKING) {
                 selectedItem.getInputComponent().pause();
             }
         });
@@ -100,7 +100,7 @@ public class InputController {
 
         inputTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
-                setStartPauseInputButtonTextByState(newSelection.getState());
+                setStartPauseInputButtonTextByState(newSelection.getInputComponent().getState());
 
                 if (newSelection.getInputComponent() instanceof FileInput) {
                     directoriesListView.setItems(FXCollections.observableList(((FileInput) newSelection.getInputComponent()).getDirectories()));
@@ -158,8 +158,6 @@ public class InputController {
                 .filter((uiInputComponent1 -> uiInputComponent1.getInputComponent() == inputComponent)).findFirst();
 
         uiInputComponentOptional.ifPresent((uiInputComponent) -> {
-            uiInputComponent.setState(inputComponentState);
-
             if(inputTableView.getSelectionModel().getSelectedItem() == uiInputComponent) {
                 setStartPauseInputButtonTextByState(inputComponentState);
             }

@@ -7,4 +7,6 @@ public interface InputComponent {
     void resume();
 
     void shutdown();
+
+    InputComponentState getState();
 }

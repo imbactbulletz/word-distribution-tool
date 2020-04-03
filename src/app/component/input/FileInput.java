@@ -34,7 +34,7 @@ public class FileInput implements InputComponent, Runnable {
 
     private List<File> filesForReading = new CopyOnWriteArrayList<>();
 
-    private InputComponentState state;
+    private volatile InputComponentState state;
 
     private volatile boolean isPaused = true;
 
@@ -244,5 +244,10 @@ public class FileInput implements InputComponent, Runnable {
 
     public void setHasActiveWorker(boolean hasActiveWorker) {
         this.hasActiveWorker = hasActiveWorker;
+    }
+
+    @Override
+    public InputComponentState getState() {
+        return state;
     }
 }
