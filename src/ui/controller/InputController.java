@@ -4,6 +4,7 @@ import app.component.input.FileInput;
 import app.component.input.InputComponent;
 import app.component.input.InputComponentState;
 import app.global.Config;
+import app.global.Executors;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -18,12 +19,9 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class InputController {
     private final InputControllerModel model = new InputControllerModel();
-    private final ExecutorService componentExecutorService = Executors.newCachedThreadPool();
     @FXML
     private Button addInputButton;
     @FXML
@@ -78,7 +76,7 @@ public class InputController {
 
             if (selectedItem.getInputComponent().getState() == InputComponentState.NOT_STARTED || selectedItem.getInputComponent().getState() == InputComponentState.PAUSED) {
                 selectedItem.getInputComponent().resume();
-            } else if(selectedItem.getInputComponent().getState() == InputComponentState.WORKING) {
+            } else if (selectedItem.getInputComponent().getState() == InputComponentState.WORKING) {
                 selectedItem.getInputComponent().pause();
             }
         });
@@ -118,7 +116,7 @@ public class InputController {
     }
 
     private void setStartPauseInputButtonTextByState(InputComponentState state) {
-        if(state == InputComponentState.NOT_STARTED || state == InputComponentState.PAUSED) {
+        if (state == InputComponentState.NOT_STARTED || state == InputComponentState.PAUSED) {
             startPauseInputButton.setText("Start");
         } else if (state == InputComponentState.WORKING) {
             startPauseInputButton.setText("Pause");
@@ -137,7 +135,7 @@ public class InputController {
         UIInputComponent uiInputComponent = new UIInputComponent(fileInput);
         model.getUiInputComponents().add(uiInputComponent);
         inputTableView.getSelectionModel().select(uiInputComponent);
-        componentExecutorService.submit(fileInput);
+        Executors.COMPONENT.submit(fileInput);
         removeInputButton.setDisable(false);
         startPauseInputButton.setDisable(false);
         addDirectoryButton.setDisable(false);
@@ -158,7 +156,7 @@ public class InputController {
                 .filter((uiInputComponent1 -> uiInputComponent1.getInputComponent() == inputComponent)).findFirst();
 
         uiInputComponentOptional.ifPresent((uiInputComponent) -> {
-            if(inputTableView.getSelectionModel().getSelectedItem() == uiInputComponent) {
+            if (inputTableView.getSelectionModel().getSelectedItem() == uiInputComponent) {
                 setStartPauseInputButtonTextByState(inputComponentState);
             }
         });
@@ -213,20 +211,20 @@ public class InputController {
             File selectedDirectory = directoriesListView.getSelectionModel().getSelectedItem();
 
             if (selectedUIInputComponent != null && selectedDirectory != null && selectedUIInputComponent.getInputComponent() instanceof FileInput) {
-                    List<File> directoriesList = ((FileInput) selectedUIInputComponent.getInputComponent()).getDirectories();
-                    int selectedDirectoryIndex = directoriesList.indexOf(selectedDirectory);
-                    if(directoriesList.size() > 1) {
-                        if(selectedDirectoryIndex == 0) {
-                            directoriesListView.getSelectionModel().select(1);
-                        } else {
-                            directoriesListView.getSelectionModel().select(selectedDirectoryIndex - 1);
-                        }
+                List<File> directoriesList = ((FileInput) selectedUIInputComponent.getInputComponent()).getDirectories();
+                int selectedDirectoryIndex = directoriesList.indexOf(selectedDirectory);
+                if (directoriesList.size() > 1) {
+                    if (selectedDirectoryIndex == 0) {
+                        directoriesListView.getSelectionModel().select(1);
                     } else {
-                        removeDirectoryButton.setDisable(true);
+                        directoriesListView.getSelectionModel().select(selectedDirectoryIndex - 1);
                     }
+                } else {
+                    removeDirectoryButton.setDisable(true);
+                }
 
-                    ((FileInput) selectedUIInputComponent.getInputComponent()).removeDirectory(selectedDirectory);
-                    directoriesListView.refresh();
+                ((FileInput) selectedUIInputComponent.getInputComponent()).removeDirectory(selectedDirectory);
+                directoriesListView.refresh();
             }
         });
     }
