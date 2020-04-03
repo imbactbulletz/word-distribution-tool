@@ -30,7 +30,8 @@ public class CruncherController {
 
     private Consumer<UICruncherComponent> onTableItemSelectedListener;
 
-    private BiConsumer<UICruncherComponent, Boolean> onLinkUnlinkButtonClicked;
+    private Consumer<UICruncherComponent> onLinkUnlinkButtonClickedListener;
+
     public void init() {
         initAddCruncherButton();
         initRemoveCruncherButton();
@@ -73,7 +74,7 @@ public class CruncherController {
                 if (model.getCruncherComponents().size() == 0) {
                     removeCruncherButton.setDisable(true);
                     // notify main controller cruncher table is empty
-                    if(onTableItemSelectedListener != null) {
+                    if (onTableItemSelectedListener != null) {
                         onTableItemSelectedListener.accept(null);
                     } else {
                         System.err.println("Table item selected listener must not be null.");
@@ -85,13 +86,22 @@ public class CruncherController {
 
     private void initLinkUnlinkButton() {
         linkUnlinkCruncherButton.setDisable(true);
+        linkUnlinkCruncherButton.setOnAction((e) -> {
+            UICruncherComponent uiCruncherComponent = crunchersTableView.getSelectionModel().getSelectedItem();
+
+            if (onLinkUnlinkButtonClickedListener != null) {
+                onLinkUnlinkButtonClickedListener.accept(uiCruncherComponent);
+            } else {
+                System.err.println("Link/Unlink button click listener must not be null.");
+            }
+        });
     }
 
     public void setLinkUnlinkButtonStateAndText(boolean isDisabled, boolean isLinked) {
         linkUnlinkCruncherButton.setDisable(isDisabled);
 
         String buttonText;
-        if(isLinked) {
+        if (isLinked) {
             buttonText = "Unlink";
         } else {
             buttonText = "Link";
@@ -123,11 +133,16 @@ public class CruncherController {
         crunchersTableView.getColumns().addAll(nameColumn, arityColumn);
     }
 
+
+    public UICruncherComponent getSelectedCruncherComponent() {
+        return crunchersTableView.getSelectionModel().getSelectedItem();
+    }
+
     public void setOnTableItemSelectedListener(Consumer<UICruncherComponent> onTableItemSelectedListener) {
         this.onTableItemSelectedListener = onTableItemSelectedListener;
     }
 
-    public UICruncherComponent getSelectedCruncherComponent() {
-        return crunchersTableView.getSelectionModel().getSelectedItem();
+    public void setOnLinkUnlinkButtonClickedListener(Consumer<UICruncherComponent> onLinkUnlinkButtonClickedListener) {
+        this.onLinkUnlinkButtonClickedListener = onLinkUnlinkButtonClickedListener;
     }
 }

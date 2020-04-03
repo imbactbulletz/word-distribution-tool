@@ -1,5 +1,7 @@
 package ui.controller;
 
+import app.component.cruncher.CruncherComponent;
+import app.component.input.InputComponent;
 import ui.model.cruncher.UICruncherComponent;
 import ui.model.input.UIInputComponent;
 
@@ -18,6 +20,20 @@ public class MainController {
             UICruncherComponent uiCruncherComponent = CRUNCHER_CONTROLLER.getSelectedCruncherComponent();
             setLinkUnlinkButtonStateAndText(uiInputComponent, uiCruncherComponent);
         });
+
+        CRUNCHER_CONTROLLER.setOnLinkUnlinkButtonClickedListener((uiCruncherComponent -> {
+            CruncherComponent cruncherComponent = uiCruncherComponent.getCruncherComponent();
+            UIInputComponent uiInputComponent = INPUT_CONTROLLER.getSelectedInputComponent();
+            InputComponent inputComponent = uiInputComponent.getInputComponent();
+
+            if(inputComponent.getCruncherComponents().contains(cruncherComponent)) {
+                inputComponent.getCruncherComponents().remove(cruncherComponent);
+            } else {
+                inputComponent.getCruncherComponents().add(cruncherComponent);
+            }
+
+            setLinkUnlinkButtonStateAndText(uiInputComponent, uiCruncherComponent);
+        }));
     }
 
     private void setLinkUnlinkButtonStateAndText(UIInputComponent uiInputComponent, UICruncherComponent uiCruncherComponent) {
