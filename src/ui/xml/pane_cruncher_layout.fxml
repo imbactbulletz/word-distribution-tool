@@ -52,7 +52,7 @@
                         <Insets right="5.0" />
                     </HBox.margin>
                 </Button>
-                <Button fx:id="LinkUnlinkCruncherButton" mnemonicParsing="false" text="Link">
+                <Button fx:id="linkUnlinkCruncherButton" mnemonicParsing="false" text="Link">
                     <HBox.margin>
                         <Insets />
                     </HBox.margin>
