@@ -21,10 +21,13 @@ public class CruncherController {
     @FXML
     private Button addCruncherButton;
     @FXML
+    private Button removeCruncherButton;
+    @FXML
     private TableView<UICruncherModel> crunchersTableView;
 
     public void init() {
         initAddCruncherButton();
+        initRemoveCruncherButton();
         initCrunchersTableView();
     }
 
@@ -38,10 +41,32 @@ public class CruncherController {
                     CounterCruncher counterCruncher = new CounterCruncher(arityValue);
                     String counterCruncherName = "Counter " + model.getTotalCrunchersCreated();
                     model.getCruncherComponents().add(new UICruncherModel(counterCruncher, counterCruncherName));
+
+                    crunchersTableView.getSelectionModel().selectLast();
+
+                    if(removeCruncherButton.isDisable()) {
+                        removeCruncherButton.setDisable(false);
+                    }
                 } catch (NumberFormatException nex) {
                     DialogUtil.showErrorDialog("Add Cruncher", "Invalid arity. Cruncher not added.");
                 }
             });
+        });
+    }
+
+    private void initRemoveCruncherButton() {
+        // initially disabled, since no content is present
+        removeCruncherButton.setDisable(true);
+
+        removeCruncherButton.setOnAction((e) -> {
+            UICruncherModel selectedItem = crunchersTableView.getSelectionModel().getSelectedItem();
+            if(selectedItem != null) {
+                model.getCruncherComponents().remove(selectedItem);
+
+                if(model.getCruncherComponents().size() == 0) {
+                    removeCruncherButton.setDisable(true);
+                }
+            }
         });
     }
 
