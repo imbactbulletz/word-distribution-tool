@@ -2,15 +2,27 @@ package app.component.input;
 
 public class FileInfo {
 
-    String fileName;
+    final String fileName;
 
-    String absolutePath;
+    final String absolutePath;
 
-    String content;
+    final String content;
 
     public FileInfo(String fileName, String absolutePath, String content) {
         this.fileName = fileName;
         this.absolutePath = absolutePath;
         this.content = content;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public String getAbsolutePath() {
+        return absolutePath;
+    }
+
+    public String getContent() {
+        return content;
     }
 }
