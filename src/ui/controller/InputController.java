@@ -113,7 +113,7 @@ public class InputController {
                 }
 
                 if (onInputTableItemSelectedListener != null) {
-                    onInputTableItemSelectedListener.accept(null);
+                    onInputTableItemSelectedListener.accept(newSelection);
                 } else {
                     System.err.println("Input table selected item listener must not be null.");
                 }
