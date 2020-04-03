@@ -1,7 +1,35 @@
 package ui.controller;
 
+import ui.model.cruncher.UICruncherComponent;
+import ui.model.input.UIInputComponent;
+
 public class MainController {
 
     public static final InputController INPUT_CONTROLLER = new InputController();
     public static final CruncherController CRUNCHER_CONTROLLER = new CruncherController();
+
+    public MainController() {
+        CRUNCHER_CONTROLLER.setOnTableItemSelectedListener((uiCruncherComponent -> {
+            UIInputComponent uiInputComponent = INPUT_CONTROLLER.getSelectedInputComponent();
+            setLinkUnlinkButtonStateAndText(uiInputComponent, uiCruncherComponent);
+        }));
+
+        INPUT_CONTROLLER.setOnInputTableItemSelectedListener(uiInputComponent -> {
+            UICruncherComponent uiCruncherComponent = CRUNCHER_CONTROLLER.getSelectedCruncherComponent();
+            setLinkUnlinkButtonStateAndText(uiInputComponent, uiCruncherComponent);
+        });
+    }
+
+    private void setLinkUnlinkButtonStateAndText(UIInputComponent uiInputComponent, UICruncherComponent uiCruncherComponent) {
+        if(uiInputComponent == null || uiCruncherComponent == null) {
+            CRUNCHER_CONTROLLER.setLinkUnlinkButtonStateAndText(true, false);
+            return;
+        }
+
+        if(uiInputComponent.getInputComponent().getCruncherComponents().contains(uiCruncherComponent.getCruncherComponent())) {
+            CRUNCHER_CONTROLLER.setLinkUnlinkButtonStateAndText(false, true);
+        } else {
+            CRUNCHER_CONTROLLER.setLinkUnlinkButtonStateAndText(false, false);
+        }
+    }
 }

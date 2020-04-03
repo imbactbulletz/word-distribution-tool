@@ -19,6 +19,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class InputController {
     private final InputControllerModel model = new InputControllerModel();
@@ -37,6 +38,8 @@ public class InputController {
     private Button removeDirectoryButton;
     @FXML
     private ListView<File> directoriesListView;
+
+    private Consumer<UIInputComponent> onInputTableItemSelectedListener;
 
     public void init() {
         // file input controls
@@ -108,6 +111,12 @@ public class InputController {
                         removeDirectoryButton.setDisable(false);
                     }
                 }
+
+                if (onInputTableItemSelectedListener != null) {
+                    onInputTableItemSelectedListener.accept(null);
+                } else {
+                    System.err.println("Input table selected item listener must not be null.");
+                }
             }
         });
 
@@ -176,6 +185,12 @@ public class InputController {
                 addDirectoryButton.setDisable(true);
                 removeDirectoryButton.setDisable(true);
                 directoriesListView.setItems(null);
+                // notify main controller that input table is empty
+                if (onInputTableItemSelectedListener != null) {
+                    onInputTableItemSelectedListener.accept(null);
+                } else {
+                    System.err.println("Input table selected item listener must not be null.");
+                }
             }
         }));
     }
@@ -241,5 +256,13 @@ public class InputController {
                 }
             }
         });
+    }
+
+    public UIInputComponent getSelectedInputComponent() {
+        return inputTableView.getSelectionModel().getSelectedItem();
+    }
+
+    public void setOnInputTableItemSelectedListener(Consumer<UIInputComponent> onInputTableItemSelectedListener) {
+        this.onInputTableItemSelectedListener = onInputTableItemSelectedListener;
     }
 }

@@ -2,13 +2,13 @@ package ui.model.cruncher;
 
 import app.component.cruncher.CruncherComponent;
 
-public class UICruncherModel {
+public class UICruncherComponent {
 
     private final CruncherComponent cruncherComponent;
 
     private final String name;
 
-    public UICruncherModel(CruncherComponent cruncherComponent, String name) {
+    public UICruncherComponent(CruncherComponent cruncherComponent, String name) {
         this.cruncherComponent = cruncherComponent;
         this.name = name;
     }
