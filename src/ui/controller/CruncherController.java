@@ -1,8 +1,12 @@
 package ui.controller;
 
 import app.component.cruncher.CounterCruncher;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import ui.model.cruncher.CruncherControllerModel;
 import ui.model.cruncher.UICruncherModel;
 import ui.util.DialogUtil;
@@ -16,10 +20,12 @@ public class CruncherController {
 
     @FXML
     private Button addCruncherButton;
-
+    @FXML
+    private TableView<UICruncherModel> crunchersTableView;
 
     public void init() {
         initAddCruncherButton();
+        initCrunchersTableView();
     }
 
     private void initAddCruncherButton() {
@@ -37,5 +43,19 @@ public class CruncherController {
                 }
             });
         });
+    }
+
+    private void initCrunchersTableView() {
+        createColumns();
+        crunchersTableView.setItems(model.getCruncherComponents());
+    }
+
+    @SuppressWarnings("unchecked")
+    private void createColumns() {
+        TableColumn<UICruncherModel, String> nameColumn = new TableColumn<>("Name");
+        nameColumn.setCellValueFactory((cellData) -> new SimpleStringProperty(cellData.getValue().getName()));
+        TableColumn<UICruncherModel, Integer> arityColumn = new TableColumn<>("Arity");
+        arityColumn.setCellValueFactory((cellData) -> new SimpleObjectProperty<>(cellData.getValue().getCruncherComponent().getArity()));
+        crunchersTableView.getColumns().addAll(nameColumn, arityColumn);
     }
 }
