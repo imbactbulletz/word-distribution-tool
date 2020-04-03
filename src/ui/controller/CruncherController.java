@@ -1,6 +1,8 @@
 package ui.controller;
 
 import app.component.cruncher.CounterCruncher;
+import app.component.input.InputComponent;
+import app.global.Executors;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
@@ -10,9 +12,7 @@ import javafx.scene.control.TableView;
 import ui.model.cruncher.CruncherControllerModel;
 import ui.model.cruncher.UICruncherComponent;
 import ui.util.DialogUtil;
-
 import java.util.Optional;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 
@@ -49,7 +49,7 @@ public class CruncherController {
                     CounterCruncher counterCruncher = new CounterCruncher(arityValue);
                     String counterCruncherName = "Counter " + model.getTotalCrunchersCreated();
                     model.getCruncherComponents().add(new UICruncherComponent(counterCruncher, counterCruncherName));
-
+                    Executors.COMPONENT.submit(counterCruncher);
                     crunchersTableView.getSelectionModel().selectLast();
 
                     if (removeCruncherButton.isDisable()) {
@@ -69,8 +69,11 @@ public class CruncherController {
         removeCruncherButton.setOnAction((e) -> {
             UICruncherComponent selectedItem = crunchersTableView.getSelectionModel().getSelectedItem();
             if (selectedItem != null) {
-                model.getCruncherComponents().remove(selectedItem);
+                for (InputComponent inputComponent: selectedItem.getCruncherComponent().getLinkedInputComponents()) {
+                    inputComponent.getCruncherComponents().remove(selectedItem.getCruncherComponent());
+                }
 
+                model.getCruncherComponents().remove(selectedItem);
                 if (model.getCruncherComponents().size() == 0) {
                     removeCruncherButton.setDisable(true);
                     // notify main controller cruncher table is empty

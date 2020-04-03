@@ -28,8 +28,10 @@ public class MainController {
 
             if(inputComponent.getCruncherComponents().contains(cruncherComponent)) {
                 inputComponent.getCruncherComponents().remove(cruncherComponent);
+                cruncherComponent.getLinkedInputComponents().remove(inputComponent);
             } else {
                 inputComponent.getCruncherComponents().add(cruncherComponent);
+                cruncherComponent.getLinkedInputComponents().add(inputComponent);
             }
 
             setLinkUnlinkButtonStateAndText(uiInputComponent, uiCruncherComponent);
