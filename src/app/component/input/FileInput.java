@@ -87,8 +87,6 @@ public class FileInput implements InputComponent, Runnable {
             List<File> changedFiles = getChangedFiles(filesInDirectories);
             if (isPaused || !isRunning) continue;
             if (changedFiles.size() > 0) scheduleFilesForReading(changedFiles);
-            // scan all files
-            // check if they should be scanned (if they are not currently in the cache or have same last date modified)
             if (!isPaused && isRunning) waitForNextScanCycle();
         }
 
