@@ -28,6 +28,7 @@ public class MainWindow extends Application {
         fxmlLoader = new FXMLLoader(getClass().getResource("xml/pane_cruncher_layout.fxml"));
         fxmlLoader.setController(MainController.CRUNCHER_CONTROLLER);
         Parent cruncherPane = fxmlLoader.load();
+        MainController.CRUNCHER_CONTROLLER.init();
         gridPane.add(cruncherPane,1,0,1,3);
 
         primaryStage.setTitle("Word Distribution Tool");
