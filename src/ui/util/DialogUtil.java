@@ -2,6 +2,7 @@ package ui.util;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ChoiceDialog;
+import javafx.scene.control.TextInputDialog;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
 
@@ -30,5 +31,13 @@ public class DialogUtil {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setInitialDirectory(Paths.get(path).toFile());
         return directoryChooser.showDialog(parentWindow);
+    }
+
+    public static Optional<String> showTextInputDialog(String title, String headerText, String defaultValue) {
+        TextInputDialog textInputDialog = new TextInputDialog(defaultValue);
+        textInputDialog.setTitle(title);
+        textInputDialog.setTitle(headerText);
+
+        return textInputDialog.showAndWait();
     }
 }
