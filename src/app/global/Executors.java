@@ -1,18 +1,19 @@
 package app.global;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
 
 public class Executors {
 
     static {
         COMPONENT = java.util.concurrent.Executors.newCachedThreadPool();
         INPUT = java.util.concurrent.Executors.newCachedThreadPool();
-        CRUNCHER = java.util.concurrent.Executors.newCachedThreadPool();
+        CRUNCHER = new ForkJoinPool();
     }
 
     public static final ExecutorService COMPONENT;
 
     public static final ExecutorService INPUT;
 
-    public static final ExecutorService CRUNCHER;
+    public static final ForkJoinPool CRUNCHER;
 }
