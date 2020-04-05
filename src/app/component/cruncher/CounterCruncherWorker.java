@@ -4,8 +4,6 @@ import app.component.cruncher.typealias.BagOfWords;
 import app.component.cruncher.typealias.CrunchResult;
 import app.global.Config;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.RecursiveTask;
 import java.util.regex.PatternSyntaxException;
 
@@ -25,10 +23,18 @@ public class CounterCruncherWorker extends RecursiveTask<CrunchResult> {
 
         // chunk is lesser than whole input text divide into more tasks
         if (inputText.length() > chunkToCrunch.length()) {
-            return crunchChunk(chunkToCrunch);
+            CounterCruncherWorker leftTask = new CounterCruncherWorker(bagOfWordSize, inputText.substring(chunkToCrunch.length()));
+            leftTask.fork();
+
+            // TODO question for Bane: couldn't crunchChunk() have been called instead of creating a right task and calling compute on it?
+            CounterCruncherWorker rightTask = new CounterCruncherWorker(bagOfWordSize, chunkToCrunch);
+            CrunchResult crunchRightResult = rightTask.compute();
+            CrunchResult crunchLeftResult = leftTask.join();
+
+            crunchRightResult.combineWith(crunchLeftResult);
+                return crunchRightResult;
         } else {
-            CrunchResult crunchResult = crunchChunk(chunkToCrunch);
-            return crunchResult;
+            return crunchChunk(chunkToCrunch);
         }
     }
 
@@ -66,9 +72,8 @@ public class CounterCruncherWorker extends RecursiveTask<CrunchResult> {
 
     private CrunchResult crunchChunk(String inputText) {
         CrunchResult crunchResult = new CrunchResult();
-
         try {
-            String[] words = inputText.split(" ");
+            String[] words = inputText.trim().split("\\s+");
             for (int currentWordIndex = 0; currentWordIndex <= words.length - bagOfWordSize; currentWordIndex++) {
                 BagOfWords bagOfWords = new BagOfWords();
                 for( int lookAheadIndex = 0; lookAheadIndex < bagOfWordSize; lookAheadIndex++) {

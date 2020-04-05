@@ -1,13 +1,11 @@
 package app.component.cruncher;
 
-import app.component.cruncher.typealias.CrunchResult;
 import app.component.input.FileInfo;
 import app.component.input.InputComponent;
 import app.global.Executors;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class CounterCruncher implements CruncherComponent, Runnable {
@@ -29,7 +27,7 @@ public class CounterCruncher implements CruncherComponent, Runnable {
                 FileInfo fileInfo;
                 fileInfo = crunchQueue.take();
                 System.out.println("Crunching " + fileInfo.getFileName());
-                Future<CrunchResult> crunchResultFuture = Executors.CRUNCHER.submit(new CounterCruncherWorker(arity, fileInfo.getContent()));
+                Executors.CRUNCHER.submit(new CounterCruncherWorker(arity, fileInfo.getContent()));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
