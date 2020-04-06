@@ -5,10 +5,11 @@ import app.global.Executors;
 import javafx.application.Platform;
 import ui.controller.MainController;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
-import java.util.Scanner;
 
 public class FileInputReadWorker implements Runnable {
 
@@ -54,17 +55,20 @@ public class FileInputReadWorker implements Runnable {
         File file = new File(pathname);
         StringBuilder fileContents = new StringBuilder((int) file.length());
 
-        try (Scanner scanner = new Scanner(file)) {
-            while (scanner.hasNextLine()) {
-                fileContents.append(scanner.nextLine()).append(System.lineSeparator());
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
+            String currentLine;
+            while ((currentLine = bufferedReader.readLine()) != null) {
+                fileContents.append(currentLine).append(System.lineSeparator());
             }
             return fileContents.toString();
+        } catch (OutOfMemoryError error) {
+            error.printStackTrace();
+            System.exit(-404);
+            return null;
         }
     }
 
     private void notifyUI(String message) {
-        Platform.runLater(() -> {
-            MainController.INPUT_CONTROLLER.refreshEntryStatus(fileInput, message);
-        });
+        Platform.runLater(() -> MainController.INPUT_CONTROLLER.refreshEntryStatus(fileInput, message));
     }
 }
