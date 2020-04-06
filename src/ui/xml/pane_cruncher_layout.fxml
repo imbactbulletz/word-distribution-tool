@@ -69,7 +69,7 @@
                 </font>
             </Label>
         </HBox>
-        <ListView fx:id="statusListView" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="6" GridPane.rowSpan="3" />
+        <ListView fx:id="statusesListView" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="6" GridPane.rowSpan="3" />
     </children>
     <padding>
         <Insets left="10.0" />
