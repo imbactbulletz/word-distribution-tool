@@ -3,6 +3,8 @@ package app.component.cruncher;
 import app.component.cruncher.typealias.BagOfWords;
 import app.component.cruncher.typealias.CrunchResult;
 import app.global.Config;
+import javafx.application.Platform;
+import ui.controller.MainController;
 
 import java.util.concurrent.RecursiveTask;
 import java.util.regex.PatternSyntaxException;
@@ -11,10 +13,16 @@ public class CounterCruncherWorker extends RecursiveTask<CrunchResult> {
 
     private final int bagOfWordSize;
     private String inputText;
+    private final boolean hasParentTask;
+    private final String jobName;
+    private final CruncherComponent cruncherComponent;
 
-    public CounterCruncherWorker(int bagOfWordSize, String text) {
+    public CounterCruncherWorker(CruncherComponent cruncherComponent, int bagOfWordSize, String jobName, String text, boolean hasParentTask) {
         this.bagOfWordSize = bagOfWordSize;
         this.inputText = text;
+        this.hasParentTask = hasParentTask;
+        this.cruncherComponent = cruncherComponent;
+        this.jobName = jobName;
     }
 
     @Override
@@ -24,17 +32,20 @@ public class CounterCruncherWorker extends RecursiveTask<CrunchResult> {
 
             // chunk is lesser than whole input text divide into more tasks
             if (inputText.length() > chunkToCrunch.length()) {
-                CounterCruncherWorker leftTask = new CounterCruncherWorker(bagOfWordSize, inputText.substring(chunkToCrunch.length()));
+                CounterCruncherWorker leftTask = new CounterCruncherWorker(cruncherComponent, bagOfWordSize, jobName, inputText.substring(chunkToCrunch.length()), true);
                 // lose reference (since it's only kept in this tasks, while it lives) in order for garbage collector do its job
                 inputText = null;
                 leftTask.fork();
 
                 // TODO question for Bane: couldn't crunchChunk() have been called instead of creating a right task and calling compute on it?
-                CounterCruncherWorker rightTask = new CounterCruncherWorker(bagOfWordSize, chunkToCrunch);
+                CounterCruncherWorker rightTask = new CounterCruncherWorker(cruncherComponent, bagOfWordSize, jobName, chunkToCrunch, true);
                 CrunchResult crunchRightResult = rightTask.compute();
                 CrunchResult crunchLeftResult = leftTask.join();
 
                 crunchRightResult.combineWith(crunchLeftResult);
+                if(!hasParentTask) {
+                    notifyUIOfFinishedJob(cruncherComponent, jobName);
+                }
                 return crunchRightResult;
             } else {
                 return crunchChunk(chunkToCrunch);
@@ -100,5 +111,9 @@ public class CounterCruncherWorker extends RecursiveTask<CrunchResult> {
         }
 
         return crunchResult;
+    }
+
+    private void notifyUIOfFinishedJob(CruncherComponent cruncherComponent, String jobName) {
+        Platform.runLater(() -> MainController.CRUNCHER_CONTROLLER.refreshJobStatus(cruncherComponent, jobName, CruncherJobStatus.IS_DONE));
     }
 }

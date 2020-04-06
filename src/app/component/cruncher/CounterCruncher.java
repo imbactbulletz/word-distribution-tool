@@ -3,6 +3,8 @@ package app.component.cruncher;
 import app.component.input.FileInfo;
 import app.component.input.InputComponent;
 import app.global.Executors;
+import javafx.application.Platform;
+import ui.controller.MainController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +29,8 @@ public class CounterCruncher implements CruncherComponent, Runnable {
                 FileInfo fileInfo;
                 fileInfo = crunchQueue.take();
                 System.out.println("Crunching " + fileInfo.getFileName());
-                Executors.CRUNCHER.submit(new CounterCruncherWorker(arity, fileInfo.getContent()));
+                notifyUIOfStartedJob(fileInfo.getFileName(), CruncherJobStatus.IS_CRUNCHING);
+                Executors.CRUNCHER.submit(new CounterCruncherWorker(this, arity, fileInfo.getFileName(), fileInfo.getContent(), false));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -46,5 +49,9 @@ public class CounterCruncher implements CruncherComponent, Runnable {
 
     public List<InputComponent> getLinkedInputComponents() {
         return linkedInputComponents;
+    }
+
+    private void notifyUIOfStartedJob(String jobName, CruncherJobStatus cruncherJobStatus) {
+        Platform.runLater(() -> MainController.CRUNCHER_CONTROLLER.refreshJobStatus(this, jobName, cruncherJobStatus));
     }
 }

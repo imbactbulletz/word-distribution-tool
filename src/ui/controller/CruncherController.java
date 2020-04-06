@@ -1,17 +1,21 @@
 package ui.controller;
 
 import app.component.cruncher.CounterCruncher;
+import app.component.cruncher.CruncherComponent;
+import app.component.cruncher.CruncherJobStatus;
 import app.component.input.InputComponent;
 import app.global.Executors;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import ui.model.cruncher.CruncherControllerModel;
 import ui.model.cruncher.UICruncherComponent;
 import ui.util.DialogUtil;
+
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -27,6 +31,8 @@ public class CruncherController {
     private Button linkUnlinkCruncherButton;
     @FXML
     private TableView<UICruncherComponent> crunchersTableView;
+    @FXML
+    private ListView<String> statusesListView;
 
     private Consumer<UICruncherComponent> onTableItemSelectedListener;
 
@@ -69,7 +75,7 @@ public class CruncherController {
         removeCruncherButton.setOnAction((e) -> {
             UICruncherComponent selectedItem = crunchersTableView.getSelectionModel().getSelectedItem();
             if (selectedItem != null) {
-                for (InputComponent inputComponent: selectedItem.getCruncherComponent().getLinkedInputComponents()) {
+                for (InputComponent inputComponent : selectedItem.getCruncherComponent().getLinkedInputComponents()) {
                     inputComponent.getCruncherComponents().remove(selectedItem.getCruncherComponent());
                 }
 
@@ -120,6 +126,7 @@ public class CruncherController {
             if (newSelection != null) {
                 if (onTableItemSelectedListener != null) {
                     onTableItemSelectedListener.accept(newSelection);
+                    statusesListView.setItems(newSelection.getActiveJobNames());
                 } else {
                     System.err.println("Table item listener must not be null.");
                 }
@@ -136,6 +143,18 @@ public class CruncherController {
         crunchersTableView.getColumns().addAll(nameColumn, arityColumn);
     }
 
+    public void refreshJobStatus(CruncherComponent cruncherComponent, String jobName, CruncherJobStatus cruncherJobStatus) {
+        Optional<UICruncherComponent> uiCruncherComponentOptional = model.getCruncherComponents().stream()
+                .filter((uiCruncherComponent -> uiCruncherComponent.getCruncherComponent() == cruncherComponent)).findFirst();
+
+        uiCruncherComponentOptional.ifPresent((uiCruncherComponent -> {
+            if (cruncherJobStatus == CruncherJobStatus.IS_CRUNCHING) {
+                uiCruncherComponent.getActiveJobNames().add(jobName);
+            } else if (cruncherJobStatus == CruncherJobStatus.IS_DONE) {
+                uiCruncherComponent.getActiveJobNames().remove(jobName);
+            }
+        }));
+    }
 
     public UICruncherComponent getSelectedCruncherComponent() {
         return crunchersTableView.getSelectionModel().getSelectedItem();
