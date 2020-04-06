@@ -209,7 +209,12 @@ public class InputController {
                 String diskPath = ((FileInput) selectedComponent).getDiskPath();
                 String absoluteDiskPath = System.getProperty("user.dir") + File.separator + "src" + File.separator + diskPath;
                 Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
+
                 File directory = DialogUtil.showDirectoryChooser(absoluteDiskPath, stage);
+                if(directory == null) {
+                    return;
+                }
+
                 ((FileInput) selectedComponent).addDirectory(directory);
                 directoriesListView.setItems(FXCollections.observableList(((FileInput) selectedComponent).getDirectories()));
                 // select first item since listView doesn't select it automatically
