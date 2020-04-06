@@ -105,6 +105,12 @@ public class InputController {
 
                 if (newSelection.getInputComponent() instanceof FileInput) {
                     directoriesListView.setItems(FXCollections.observableList(((FileInput) newSelection.getInputComponent()).getDirectories()));
+
+                    if(directoriesListView.getItems().size() > 0) {
+                        directoriesListView.getSelectionModel().select(directoriesListView.getItems().size() - 1);
+                        directoriesListView.refresh();
+                    }
+
                     if (((FileInput) newSelection.getInputComponent()).getDirectories().size() == 0) {
                         removeDirectoryButton.setDisable(true);
                     } else {
