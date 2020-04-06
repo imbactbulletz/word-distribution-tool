@@ -7,9 +7,8 @@ import ui.controller.MainController;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
+import java.util.Scanner;
 
 public class FileInputReadWorker implements Runnable {
 
@@ -30,17 +29,16 @@ public class FileInputReadWorker implements Runnable {
 
         try {
             notifyUI("Reading " + file.getName());
-            String content = Files.readString(Paths.get(file.getPath()));
-            FileInfo fileInfo = new FileInfo(file.getName(), file.getAbsolutePath(), content);
-
-            for (CruncherComponent cruncherComponent: fileInput.getCruncherComponents()) {
+            FileInfo fileInfo = new FileInfo(file.getName(), file.getAbsolutePath(), readFile(file.getPath()));
+            for (CruncherComponent cruncherComponent : fileInput.getCruncherComponents()) {
                 cruncherComponent.addToQueue(fileInfo);
             }
-        } catch (IOException e) {
+        } catch (IOException | OutOfMemoryError e) {
             e.printStackTrace();
+            System.exit(-404);
         }
 
-        if(files.size() > 0) {
+        if (files.size() > 0) {
             Executors.INPUT.submit(new FileInputReadWorker(fileInput, files, monitorObject));
         } else {
             fileInput.setHasActiveWorker(false);
@@ -49,6 +47,18 @@ public class FileInputReadWorker implements Runnable {
             synchronized (monitorObject) {
                 monitorObject.notify();
             }
+        }
+    }
+
+    private String readFile(String pathname) throws IOException, OutOfMemoryError {
+        File file = new File(pathname);
+        StringBuilder fileContents = new StringBuilder((int) file.length());
+
+        try (Scanner scanner = new Scanner(file)) {
+            while (scanner.hasNextLine()) {
+                fileContents.append(scanner.nextLine()).append(System.lineSeparator());
+            }
+            return fileContents.toString();
         }
     }
 

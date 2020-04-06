@@ -10,7 +10,7 @@ import java.util.regex.PatternSyntaxException;
 public class CounterCruncherWorker extends RecursiveTask<CrunchResult> {
 
     private final int bagOfWordSize;
-    private final String inputText;
+    private String inputText;
 
     public CounterCruncherWorker(int bagOfWordSize, String text) {
         this.bagOfWordSize = bagOfWordSize;
@@ -19,22 +19,30 @@ public class CounterCruncherWorker extends RecursiveTask<CrunchResult> {
 
     @Override
     protected CrunchResult compute() {
-        String chunkToCrunch = getChunkOfInputTextToAnalyze();
+        try {
+            String chunkToCrunch = getChunkOfInputTextToAnalyze();
 
-        // chunk is lesser than whole input text divide into more tasks
-        if (inputText.length() > chunkToCrunch.length()) {
-            CounterCruncherWorker leftTask = new CounterCruncherWorker(bagOfWordSize, inputText.substring(chunkToCrunch.length()));
-            leftTask.fork();
+            // chunk is lesser than whole input text divide into more tasks
+            if (inputText.length() > chunkToCrunch.length()) {
+                CounterCruncherWorker leftTask = new CounterCruncherWorker(bagOfWordSize, inputText.substring(chunkToCrunch.length()));
+                // lose reference (since it's only kept in this tasks, while it lives) in order for garbage collector do its job
+                inputText = null;
+                leftTask.fork();
 
-            // TODO question for Bane: couldn't crunchChunk() have been called instead of creating a right task and calling compute on it?
-            CounterCruncherWorker rightTask = new CounterCruncherWorker(bagOfWordSize, chunkToCrunch);
-            CrunchResult crunchRightResult = rightTask.compute();
-            CrunchResult crunchLeftResult = leftTask.join();
+                // TODO question for Bane: couldn't crunchChunk() have been called instead of creating a right task and calling compute on it?
+                CounterCruncherWorker rightTask = new CounterCruncherWorker(bagOfWordSize, chunkToCrunch);
+                CrunchResult crunchRightResult = rightTask.compute();
+                CrunchResult crunchLeftResult = leftTask.join();
 
-            crunchRightResult.combineWith(crunchLeftResult);
+                crunchRightResult.combineWith(crunchLeftResult);
                 return crunchRightResult;
-        } else {
-            return crunchChunk(chunkToCrunch);
+            } else {
+                return crunchChunk(chunkToCrunch);
+            }
+        } catch (OutOfMemoryError outOfMemoryError) {
+            outOfMemoryError.printStackTrace();
+            System.exit(-404);
+            return new CrunchResult();
         }
     }
 
@@ -76,12 +84,11 @@ public class CounterCruncherWorker extends RecursiveTask<CrunchResult> {
             String[] words = inputText.trim().split("\\s+");
             for (int currentWordIndex = 0; currentWordIndex <= words.length - bagOfWordSize; currentWordIndex++) {
                 BagOfWords bagOfWords = new BagOfWords();
-                for( int lookAheadIndex = 0; lookAheadIndex < bagOfWordSize; lookAheadIndex++) {
+                for (int lookAheadIndex = 0; lookAheadIndex < bagOfWordSize; lookAheadIndex++) {
                     bagOfWords.add(words[currentWordIndex + lookAheadIndex]);
                 }
 
-                System.out.println( "[" + currentWordIndex + "/" + words.length + "]" + "Updating " + bagOfWords);
-                if(crunchResult.get(bagOfWords) != null) {
+                if (crunchResult.get(bagOfWords) != null) {
                     crunchResult.put(bagOfWords, crunchResult.get(bagOfWords) + 1);
                 } else {
                     crunchResult.put(bagOfWords, 1L);
