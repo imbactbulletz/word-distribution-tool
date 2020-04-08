@@ -1,6 +1,5 @@
 package ui;
 
-import com.sun.tools.javac.Main;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -15,17 +14,17 @@ public class MainWindow extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("xml/window_main_layout.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("xml/window_main_layout.fxml"));
         fxmlLoader.setController(MAIN_CONTROLLER);
         GridPane gridPane = fxmlLoader.load();
 
-        fxmlLoader = new FXMLLoader(getClass().getResource("xml/pane_input_layout.fxml"));
+        fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("xml/pane_input_layout.fxml"));
         fxmlLoader.setController(MainController.INPUT_CONTROLLER);
         Parent inputPane = fxmlLoader.load();
         MainController.INPUT_CONTROLLER.init();
         gridPane.add(inputPane, 0, 0, 1, 3);
 
-        fxmlLoader = new FXMLLoader(getClass().getResource("xml/pane_cruncher_layout.fxml"));
+        fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("xml/pane_cruncher_layout.fxml"));
         fxmlLoader.setController(MainController.CRUNCHER_CONTROLLER);
         Parent cruncherPane = fxmlLoader.load();
         MainController.CRUNCHER_CONTROLLER.init();
