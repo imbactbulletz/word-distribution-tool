@@ -30,6 +30,10 @@ public class MainWindow extends Application {
         MainController.CRUNCHER_CONTROLLER.init();
         gridPane.add(cruncherPane,1,0,1,3);
 
+        fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("xml/pane_output.fxml"));
+        Parent outputPane = fxmlLoader.load();
+        gridPane.add(outputPane, 2, 0, 4, 3);
+
         primaryStage.setTitle("Word Distribution Tool");
         primaryStage.setScene(new Scene(gridPane, 1600, 900));
         primaryStage.setResizable(false);
