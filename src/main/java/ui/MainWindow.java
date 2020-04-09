@@ -12,8 +12,12 @@ public class MainWindow extends Application {
 
     public static final MainController MAIN_CONTROLLER = new MainController();
 
+    public static void main(String[] args) {
+        launch(args);
+    }
+
     @Override
-    public void start(Stage primaryStage) throws Exception{
+    public void start(Stage primaryStage) throws Exception {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("xml/window_main_layout.fxml"));
         fxmlLoader.setController(MAIN_CONTROLLER);
         GridPane gridPane = fxmlLoader.load();
@@ -28,7 +32,7 @@ public class MainWindow extends Application {
         fxmlLoader.setController(MainController.CRUNCHER_CONTROLLER);
         Parent cruncherPane = fxmlLoader.load();
         MainController.CRUNCHER_CONTROLLER.init();
-        gridPane.add(cruncherPane,1,0,1,3);
+        gridPane.add(cruncherPane, 1, 0, 1, 3);
 
         fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("xml/pane_output.fxml"));
         Parent outputPane = fxmlLoader.load();
@@ -38,9 +42,10 @@ public class MainWindow extends Application {
         primaryStage.setScene(new Scene(gridPane, 1600, 900));
         primaryStage.setResizable(false);
         primaryStage.show();
-    }
 
-    public static void main(String[] args) {
-        launch(args);
+        primaryStage.setOnCloseRequest((e) -> {
+            MainController.terminateEverything();
+            e.consume();
+        });
     }
 }

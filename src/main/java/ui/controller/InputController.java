@@ -1,5 +1,7 @@
 package ui.controller;
 
+import app.component.cruncher.CruncherComponent;
+import app.component.cruncher.typealias.FileInfoPoison;
 import app.component.input.FileInput;
 import app.component.input.InputComponent;
 import app.component.input.InputComponentState;
@@ -275,5 +277,15 @@ public class InputController {
 
     public void setOnInputTableItemSelectedListener(Consumer<UIInputComponent> onInputTableItemSelectedListener) {
         this.onInputTableItemSelectedListener = onInputTableItemSelectedListener;
+    }
+
+    public void terminateFileInputComponents() {
+        for(UIInputComponent uiInputComponent: model.getUiInputComponents()) {
+            uiInputComponent.getInputComponent().shutdown();
+
+            for(CruncherComponent cruncherComponent: uiInputComponent.getInputComponent().getCruncherComponents()) {
+                cruncherComponent.addToQueue(new FileInfoPoison(null, null, null));
+            }
+        }
     }
 }

@@ -93,7 +93,6 @@ public class FileInput implements InputComponent, Runnable {
         if (hasActiveWorker) {
             waitForWorkerToFinish();
         }
-
         notifyUIOfComponentFinished(this);
         System.out.println("File input has been shut down.");
     }

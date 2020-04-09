@@ -1,5 +1,6 @@
 package app.component.cruncher;
 
+import app.component.cruncher.typealias.FileInfoPoison;
 import app.component.input.FileInfo;
 import app.component.input.InputComponent;
 import app.global.Executors;
@@ -28,6 +29,7 @@ public class CounterCruncher implements CruncherComponent, Runnable {
             try {
                 FileInfo fileInfo;
                 fileInfo = crunchQueue.take();
+                if (fileInfo instanceof FileInfoPoison) break;
                 System.out.println("Crunching " + fileInfo.getFileName());
                 notifyUIOfStartedJob(fileInfo.getFileName(), CruncherJobStatus.IS_CRUNCHING);
                 Executors.CRUNCHER.submit(new CounterCruncherWorker(this, arity, fileInfo.getFileName(), 0, fileInfo.getContent(), false));
@@ -35,6 +37,8 @@ public class CounterCruncher implements CruncherComponent, Runnable {
                 e.printStackTrace();
             }
         }
+
+        System.out.println("Cruncher died.");
     }
 
     @Override

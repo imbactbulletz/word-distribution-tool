@@ -27,6 +27,13 @@ public class DialogUtil {
         alert.showAndWait();
     }
 
+    public static void showModalInfoDialog(String title, String headerText) {
+        Alert alert = new Alert(Alert.AlertType.NONE);
+        alert.setTitle(title);
+        alert.setHeaderText(headerText);
+        alert.show();
+    }
+
     public static File showDirectoryChooser(String path, Window parentWindow) {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setInitialDirectory(Paths.get(path).toFile());
