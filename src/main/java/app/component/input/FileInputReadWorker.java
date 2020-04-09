@@ -34,9 +34,9 @@ public class FileInputReadWorker implements Runnable {
             for (CruncherComponent cruncherComponent : fileInput.getCruncherComponents()) {
                 cruncherComponent.addToQueue(fileInfo);
             }
-        } catch (IOException | OutOfMemoryError e) {
+        } catch (OutOfMemoryError e) {
             e.printStackTrace();
-            System.exit(-404);
+            notifyUIOfTermination();
         }
 
         if (files.size() > 0) {
@@ -51,7 +51,7 @@ public class FileInputReadWorker implements Runnable {
         }
     }
 
-    private String readFile(String pathname) throws IOException, OutOfMemoryError {
+    private String readFile(String pathname) throws OutOfMemoryError {
         File file = new File(pathname);
         StringBuilder fileContents = new StringBuilder((int) file.length());
 
@@ -61,14 +61,17 @@ public class FileInputReadWorker implements Runnable {
                 fileContents.append(currentLine).append(System.lineSeparator());
             }
             return fileContents.toString();
-        } catch (OutOfMemoryError error) {
-            error.printStackTrace();
-            System.exit(-404);
+        } catch (IOException e) {
+            e.printStackTrace();
             return null;
         }
     }
 
     private void notifyUI(String message) {
         Platform.runLater(() -> MainController.INPUT_CONTROLLER.refreshEntryStatus(fileInput, message));
+    }
+
+    private void notifyUIOfTermination() {
+        Platform.runLater(() -> MainController.showOutOfMemoryErrorDialog());
     }
 }

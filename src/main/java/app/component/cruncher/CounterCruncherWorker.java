@@ -46,9 +46,12 @@ public class CounterCruncherWorker extends RecursiveTask<CrunchWorkerResult> {
             } else {
                 return crunchChunk();
             }
-        } catch (OutOfMemoryError | Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            System.exit(-404);
+            return null;
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
+            notifyUIOfTermination();
             return null;
         }
     }
@@ -118,5 +121,9 @@ public class CounterCruncherWorker extends RecursiveTask<CrunchWorkerResult> {
 
     private void notifyUIOfFinishedJob(CruncherComponent cruncherComponent, String jobName) {
         Platform.runLater(() -> MainController.CRUNCHER_CONTROLLER.refreshJobStatus(cruncherComponent, jobName, CruncherJobStatus.IS_DONE));
+    }
+
+    private void notifyUIOfTermination() {
+        Platform.runLater(() -> MainController.showOutOfMemoryErrorDialog());
     }
 }

@@ -4,6 +4,7 @@ import app.component.cruncher.CruncherComponent;
 import app.component.input.InputComponent;
 import ui.model.cruncher.UICruncherComponent;
 import ui.model.input.UIInputComponent;
+import ui.util.DialogUtil;
 
 public class MainController {
 
@@ -49,5 +50,10 @@ public class MainController {
         } else {
             CRUNCHER_CONTROLLER.setLinkUnlinkButtonStateAndText(false, false);
         }
+    }
+
+    public static void showOutOfMemoryErrorDialog() {
+        DialogUtil.showErrorDialog("Out of Memory", "Application has ran out of memory. It will shutdown now.");
+        System.exit(0);
     }
 }
