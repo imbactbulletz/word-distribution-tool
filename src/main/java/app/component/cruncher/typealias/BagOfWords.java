@@ -4,6 +4,14 @@ import java.util.ArrayList;
 
 public class BagOfWords extends ArrayList<String> {
 
+    public BagOfWords() { }
+
+    public BagOfWords(String[] words) {
+        for(String word: words) {
+            if(!word.isBlank()) this.add(word);
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

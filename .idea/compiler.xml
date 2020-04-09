@@ -20,7 +20,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="word-distribution-tool" target="1.5" />
+      <module name="word-distribution-tool" target="11" />
     </bytecodeTargetLevel>
   </component>
 </project>

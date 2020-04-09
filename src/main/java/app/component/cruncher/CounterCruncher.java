@@ -30,7 +30,7 @@ public class CounterCruncher implements CruncherComponent, Runnable {
                 fileInfo = crunchQueue.take();
                 System.out.println("Crunching " + fileInfo.getFileName());
                 notifyUIOfStartedJob(fileInfo.getFileName(), CruncherJobStatus.IS_CRUNCHING);
-                Executors.CRUNCHER.submit(new CounterCruncherWorker(this, arity, fileInfo.getFileName(), fileInfo.getContent(), false));
+                Executors.CRUNCHER.submit(new CounterCruncherWorker(this, arity, fileInfo.getFileName(), 0, fileInfo.getContent(), false));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
