@@ -133,6 +133,7 @@ public class OutputController {
                            }
 
                             Platform.runLater(() -> {
+                                chartView.getData().clear();
                                 chartView.getData().add(series);
                             });
                         });
