@@ -32,8 +32,9 @@ public class OutputController {
     private Button sumResultButton;
 
     public void init() {
+        initSingleResultButton();
+        initSumResultButton();
         initResultsListView();
-        initButtons();
     }
 
     public static void updateOutputResult(OutputResult outputResult) {
@@ -46,17 +47,13 @@ public class OutputController {
         }
     }
 
-    private void initButtons() {
-        singleResultButton.setDisable(true);
-        sumResultButton.setDisable(true);
+    private void initResultsListView() {
+        resultsListView.setItems(UI_OUTPUT_COMPONENT.getOutputResults());
         resultsListView.getItems().addListener((ListChangeListener<? super OutputResult>) (change) -> {
             singleResultButton.setDisable(change.getList().size() == 0);
             sumResultButton.setDisable(change.getList().size() == 0);
         });
-    }
 
-    private void initResultsListView() {
-        resultsListView.setItems(UI_OUTPUT_COMPONENT.getOutputResults());
         resultsListView.setCellFactory(callback -> new ListCell<>() {
             @Override
             protected void updateItem(OutputResult item, boolean empty) {
@@ -69,5 +66,14 @@ public class OutputController {
                 }
             }
         });
+    }
+
+    private void initSingleResultButton() {
+        singleResultButton.setDisable(true);
+
+    }
+
+    private void initSumResultButton() {
+        sumResultButton.setDisable(true);
     }
 }
