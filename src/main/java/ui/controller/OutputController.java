@@ -118,7 +118,6 @@ public class OutputController {
                     if (calculationResult == null) {
                         DialogUtil.showErrorDialog("Result not ready", "Result is not ready yet.");
                     } else {
-                        int duration = (int) ((calculationResult.size() * Math.log(calculationResult.size())) / Config.SORT_PROGRESS_LIMIT_RATE);
                         Thread sorterThread = new Thread(() -> {
                             AtomicInteger atomicInteger = new AtomicInteger();
                             double size = calculationResult.size();
