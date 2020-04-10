@@ -1,27 +1,68 @@
 package app.component.output;
 
 import app.component.cruncher.typealias.CruncherResult;
+import app.component.cruncher.typealias.CruncherResultPoison;
+import app.component.output.result.CategorizedResult;
+import app.component.output.result.OutputResultType;
+import app.component.output.result.typealias.Cache;
+import app.component.output.worker.NotifyUIWorker;
+import app.component.output.worker.NotifyUIWorkerImpl;
+import app.global.Executors;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class OutputCache implements OutputComponent, Runnable {
 
-    private LinkedBlockingQueue<CruncherResult> cruncherResults = new LinkedBlockingQueue<>();
+    private Cache cache = new Cache();
+
+    private LinkedBlockingQueue<OutputComponentTask> outputComponentTasks = new LinkedBlockingQueue<>();
+
+    private NotifyUIWorker notifyUiWorker;
+
+    private volatile boolean hasNotifyUiWorkerFinished = false;
 
     @Override
     public void run() {
+        startUIWorker();
+
         while (true) {
             try {
-                CruncherResult cruncherResult = this.cruncherResults.take();
-                System.out.println("Got a future for " + cruncherResult.getJobName() + " and its working status is " + cruncherResult.getCrunchWorkerResult().isDone());
+                OutputComponentTask outputComponentTask = outputComponentTasks.take();
+                if (outputComponentTask instanceof OutputComponentTaskPoison) {
+                    notifyUiWorker.shutDown();
+                    break;
+                }
+                System.out.println("Got a task!");
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+
+        while(!hasNotifyUiWorkerFinished);
+        System.out.println("Output component died.");
+    }
+
+    private void startUIWorker() {
+        NotifyUIWorkerImpl notifyUiWorkerImpl = new NotifyUIWorkerImpl(this);
+        notifyUiWorker = notifyUiWorkerImpl;
+        Executors.OUTPUT.submit(notifyUiWorkerImpl);
     }
 
     @Override
     public void addToQueue(CruncherResult cruncherResult) {
-        cruncherResults.add(cruncherResult);
+        if (cruncherResult instanceof CruncherResultPoison) {
+            outputComponentTasks.add(new OutputComponentTaskPoison());
+        } else {
+            cache.put(cruncherResult.getJobName(), new CategorizedResult(cruncherResult.getCalculationResult(), OutputResultType.SINGLE));
+        }
+    }
+
+    public Cache getCache() {
+        return cache;
+    }
+
+    public void setHasNotifyUiWorkerFinished() {
+        hasNotifyUiWorkerFinished = true;
     }
 }

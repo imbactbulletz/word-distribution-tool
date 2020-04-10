@@ -9,6 +9,7 @@ public class Executors {
         COMPONENT = java.util.concurrent.Executors.newCachedThreadPool();
         INPUT = java.util.concurrent.Executors.newCachedThreadPool();
         CRUNCHER = new ForkJoinPool();
+        OUTPUT = java.util.concurrent.Executors.newCachedThreadPool();
     }
 
     public static final ExecutorService COMPONENT;
@@ -16,4 +17,6 @@ public class Executors {
     public static final ExecutorService INPUT;
 
     public static final ForkJoinPool CRUNCHER;
+
+    public static final ExecutorService OUTPUT;
 }

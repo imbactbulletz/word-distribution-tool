@@ -8,6 +8,7 @@ import ui.model.cruncher.UICruncherComponent;
 import ui.model.input.UIInputComponent;
 import ui.util.DialogUtil;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 
@@ -15,6 +16,7 @@ public class MainController {
 
     public static final InputController INPUT_CONTROLLER = new InputController();
     public static final CruncherController CRUNCHER_CONTROLLER = new CruncherController();
+    public static final OutputController OUTPUT_CONTROLLER = new OutputController();
 
     public MainController() {
         CRUNCHER_CONTROLLER.setOnTableItemSelectedListener((uiCruncherComponent -> {
@@ -34,10 +36,10 @@ public class MainController {
 
             if (inputComponent.getCruncherComponents().contains(cruncherComponent)) {
                 inputComponent.getCruncherComponents().remove(cruncherComponent);
-                cruncherComponent.getLinkedInputComponents().remove(inputComponent);
+                uiCruncherComponent.getLinkedUiInputComponents().remove(uiInputComponent);
             } else {
                 inputComponent.getCruncherComponents().add(cruncherComponent);
-                cruncherComponent.getLinkedInputComponents().add(inputComponent);
+                uiCruncherComponent.getLinkedUiInputComponents().add(uiInputComponent);
             }
 
             setLinkUnlinkButtonStateAndText(uiInputComponent, uiCruncherComponent);
@@ -54,36 +56,24 @@ public class MainController {
         INPUT_CONTROLLER.terminateFileInputComponents();
 
         Thread shutdownThread = new Thread(() -> {
-           Executors.COMPONENT.shutdown();
-           while (!Executors.COMPONENT.isTerminated()) {
-               try {
-                   Executors.COMPONENT.awaitTermination(5, TimeUnit.SECONDS);
-               } catch (InterruptedException e) {
-                   e.printStackTrace();
-               }
-           }
-
-           Executors.INPUT.shutdown();
-           while(!Executors.INPUT.isTerminated()) {
-               try {
-                   Executors.INPUT.awaitTermination(5, TimeUnit.SECONDS);
-               } catch (InterruptedException e) {
-                   e.printStackTrace();
-               }
-           }
-
-           Executors.CRUNCHER.shutdown();
-           while(!Executors.CRUNCHER.isTerminated()) {
-               try {
-                   Executors.CRUNCHER.awaitTermination(5, TimeUnit.SECONDS);
-               } catch (InterruptedException e) {
-                   e.printStackTrace();
-               }
-           }
-
-            Platform.exit();
+           shutdownPoolAndWait(Executors.COMPONENT, 5, TimeUnit.SECONDS);
+           shutdownPoolAndWait(Executors.INPUT, 5, TimeUnit.SECONDS);
+           shutdownPoolAndWait(Executors.CRUNCHER, 5, TimeUnit.SECONDS);
+           shutdownPoolAndWait(Executors.OUTPUT, 5, TimeUnit.SECONDS);
+           Platform.exit();
         });
         shutdownThread.start();
+    }
+
+    private static  void shutdownPoolAndWait(ExecutorService threadPoolExecutor, int timeOut, TimeUnit timeUnit) {
+        threadPoolExecutor.shutdown();
+        while (!threadPoolExecutor.isTerminated()) {
+            try {
+                threadPoolExecutor.awaitTermination(timeOut, timeUnit);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void setLinkUnlinkButtonStateAndText(UIInputComponent uiInputComponent, UICruncherComponent uiCruncherComponent) {

@@ -1,6 +1,4 @@
-package app.component.cruncher.typealias;
-
-import app.component.input.FileInfo;
+package app.component.input;
 
 public class FileInfoPoison extends FileInfo {
     public FileInfoPoison(String fileName, String absolutePath, String content) {

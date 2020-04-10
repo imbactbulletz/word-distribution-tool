@@ -1,5 +1,6 @@
 package ui;
 
+import com.sun.tools.javac.Main;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -35,7 +36,9 @@ public class MainWindow extends Application {
         gridPane.add(cruncherPane, 1, 0, 1, 3);
 
         fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("xml/pane_output.fxml"));
+        fxmlLoader.setController(MainController.OUTPUT_CONTROLLER);
         Parent outputPane = fxmlLoader.load();
+        MainController.OUTPUT_CONTROLLER.init();
         gridPane.add(outputPane, 2, 0, 4, 3);
 
         primaryStage.setTitle("Word Distribution Tool");

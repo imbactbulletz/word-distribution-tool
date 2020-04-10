@@ -1,7 +1,7 @@
 package ui.controller;
 
 import app.component.cruncher.CruncherComponent;
-import app.component.cruncher.typealias.FileInfoPoison;
+import app.component.input.FileInfoPoison;
 import app.component.input.FileInput;
 import app.component.input.InputComponent;
 import app.component.input.InputComponentState;
@@ -284,7 +284,7 @@ public class InputController {
             uiInputComponent.getInputComponent().shutdown();
 
             for(CruncherComponent cruncherComponent: uiInputComponent.getInputComponent().getCruncherComponents()) {
-                cruncherComponent.addToQueue(new FileInfoPoison(null, null, null));
+                cruncherComponent.queueWork(new FileInfoPoison(null, null, null));
             }
         }
     }

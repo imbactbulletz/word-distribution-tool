@@ -14,6 +14,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import ui.model.cruncher.CruncherControllerModel;
 import ui.model.cruncher.UICruncherComponent;
+import ui.model.input.UIInputComponent;
 import ui.util.DialogUtil;
 
 import java.util.Optional;
@@ -53,6 +54,7 @@ public class CruncherController {
                     int arityValue = Integer.parseInt(arityStringValue);
                     model.incrementTotalCrunchersCreated();
                     CounterCruncher counterCruncher = new CounterCruncher(arityValue);
+                    counterCruncher.addOutputComponent(OutputController.UI_OUTPUT_COMPONENT.getOutputComponent());
                     String counterCruncherName = "Counter " + model.getTotalCrunchersCreated();
                     model.getCruncherComponents().add(new UICruncherComponent(counterCruncher, counterCruncherName));
                     Executors.COMPONENT.submit(counterCruncher);
@@ -75,8 +77,8 @@ public class CruncherController {
         removeCruncherButton.setOnAction((e) -> {
             UICruncherComponent selectedItem = crunchersTableView.getSelectionModel().getSelectedItem();
             if (selectedItem != null) {
-                for (InputComponent inputComponent : selectedItem.getCruncherComponent().getLinkedInputComponents()) {
-                    inputComponent.getCruncherComponents().remove(selectedItem.getCruncherComponent());
+                for (UIInputComponent uiInputComponent : selectedItem.getLinkedUiInputComponents()) {
+                    uiInputComponent.getInputComponent().getCruncherComponents().remove(selectedItem.getCruncherComponent());
                 }
 
                 model.getCruncherComponents().remove(selectedItem);

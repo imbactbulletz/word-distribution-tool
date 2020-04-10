@@ -4,18 +4,19 @@ import java.util.concurrent.Future;
 
 public class CruncherResult {
     private final String jobName;
-    private final Future<CrunchWorkerResult> crunchWorkerResult;
 
-    public CruncherResult(String jobName, Future<CrunchWorkerResult> crunchWorkerResult) {
+    private final Future<CalculationResult> calculationResult;
+
+    public CruncherResult(String jobName, Future<CalculationResult> calculationResult) {
         this.jobName = jobName;
-        this.crunchWorkerResult = crunchWorkerResult;
+        this.calculationResult = calculationResult;
     }
 
     public String getJobName() {
         return jobName;
     }
 
-    public Future<CrunchWorkerResult> getCrunchWorkerResult() {
-        return crunchWorkerResult;
+    public Future<CalculationResult> getCalculationResult() {
+        return calculationResult;
     }
 }

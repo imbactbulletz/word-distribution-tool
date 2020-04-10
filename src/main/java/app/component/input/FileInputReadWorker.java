@@ -32,7 +32,7 @@ public class FileInputReadWorker implements Runnable {
             notifyUI("Reading " + file.getName());
             FileInfo fileInfo = new FileInfo(file.getName(), file.getAbsolutePath(), readFile(file.getPath()));
             for (CruncherComponent cruncherComponent : fileInput.getCruncherComponents()) {
-                cruncherComponent.addToQueue(fileInfo);
+                cruncherComponent.queueWork(fileInfo);
             }
         } catch (OutOfMemoryError e) {
             e.printStackTrace();

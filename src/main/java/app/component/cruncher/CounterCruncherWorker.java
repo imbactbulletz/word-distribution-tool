@@ -1,14 +1,14 @@
 package app.component.cruncher;
 
 import app.component.cruncher.typealias.BagOfWords;
-import app.component.cruncher.typealias.CrunchWorkerResult;
+import app.component.cruncher.typealias.CalculationResult;
 import app.global.Config;
 import javafx.application.Platform;
 import ui.controller.MainController;
 
 import java.util.concurrent.RecursiveTask;
 
-public class CounterCruncherWorker extends RecursiveTask<CrunchWorkerResult> {
+public class CounterCruncherWorker extends RecursiveTask<CalculationResult> {
 
     private final int bagOfWordSize;
     private final boolean hasParentTask;
@@ -28,21 +28,21 @@ public class CounterCruncherWorker extends RecursiveTask<CrunchWorkerResult> {
     }
 
     @Override
-    protected CrunchWorkerResult compute() {
+    protected CalculationResult compute() {
         try {
             chunkEndIndex = findLastIndexForWordAt(chunkStartIndex + Config.COUNTER_DATA_LIMIT_CHARS);
             if (inputText.length() - 1 > chunkEndIndex) {
                 CounterCruncherWorker leftTask = new CounterCruncherWorker(cruncherComponent, bagOfWordSize, jobName, chunkEndIndex + 1, inputText, true);
                 leftTask.fork();
 
-                CrunchWorkerResult crunchWorkerResult = crunchChunk();
-                crunchWorkerResult.combineWith(leftTask.join());
+                CalculationResult result = crunchChunk();
+                result.combineWith(leftTask.join());
 
                 if (!hasParentTask) {
                     notifyUIOfFinishedJob(cruncherComponent, jobName);
                 }
 
-                return crunchWorkerResult;
+                return result;
             } else {
                 return crunchChunk();
             }
@@ -82,9 +82,8 @@ public class CounterCruncherWorker extends RecursiveTask<CrunchWorkerResult> {
         return inputTextLastCharacterIndex;
     }
 
-    private CrunchWorkerResult crunchChunk() {
-        CrunchWorkerResult crunchWorkerResult = new CrunchWorkerResult();
-
+    private CalculationResult crunchChunk() {
+        CalculationResult result = new CalculationResult();
         int currentIndexInString = chunkStartIndex;
         while (currentIndexInString < chunkEndIndex) {
             String bagWords = grabBagWordsFrom(currentIndexInString);
@@ -94,14 +93,14 @@ public class CounterCruncherWorker extends RecursiveTask<CrunchWorkerResult> {
             }
             BagOfWords bagOfWords = new BagOfWords(bagWords.split(" "));
             if (bagOfWords.size() < bagOfWordSize) break;
-            Long valueForKey = crunchWorkerResult.get(bagOfWords);
+            Long valueForKey = result.get(bagOfWords);
             if (valueForKey != null) {
-                crunchWorkerResult.put(bagOfWords, valueForKey + 1);
+                result.put(bagOfWords, valueForKey + 1);
             } else {
-                crunchWorkerResult.put(bagOfWords, 1L);
+                result.put(bagOfWords, 1L);
             }
         }
-        return crunchWorkerResult;
+        return result;
     }
 
     private String grabBagWordsFrom(final int startPosition) {
