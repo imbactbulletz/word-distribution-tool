@@ -36,10 +36,9 @@ public class SumWorker implements Callable<CalculationResult> {
 
         for(int i = 0; i < calculationResultFutures.size(); i++) {
             CalculationResult calculationResult = calculationResultFutures.get(i).get();
-            double progress = (double)(i+1) / calculationResultFutures.size() * 100;
+            double progress = (double)(i+1) / calculationResultFutures.size();
             categorizedResult.setProgress(progress);
             notifyUIToUpdateProgressBar(progress);
-            System.out.println(progress);
             result.combineWith(calculationResult);
         }
 

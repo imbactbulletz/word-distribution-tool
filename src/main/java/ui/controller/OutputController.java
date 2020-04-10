@@ -63,6 +63,10 @@ public class OutputController {
     public void updateProgressBar(double value) {
         progressBar.setVisible(true);
         progressBar.setProgress(value);
+        progressBar.requestLayout();
+        if(value == 1) {
+            progressBar.setVisible(false);
+        }
     }
 
     public void init() {
@@ -92,7 +96,7 @@ public class OutputController {
                 if (empty || item == null) {
                     setText(null);
                 } else {
-                    boolean isComplete = item.getProgress() == 100;
+                    boolean isComplete = item.getProgress() == 1;
                     setText(isComplete ? item.getResultName() : "*" + item.getResultName());
                 }
             }
