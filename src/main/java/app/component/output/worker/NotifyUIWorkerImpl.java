@@ -38,7 +38,11 @@ public class NotifyUIWorkerImpl implements Runnable, NotifyUIWorker {
         cacheCopy.forEach((resultName, categorizedResult) -> {
             double progress;
             if (categorizedResult.getResultType() == OutputResultType.SINGLE) {
-                progress = categorizedResult.getCalculationResultFuture().isDone() ? 100 : 0;
+                if (categorizedResult.getCalculationResultFuture() != null) {
+                    progress = categorizedResult.getCalculationResultFuture().isDone() ? 100 : 0;
+                } else {
+                    progress = 0;
+                }
             } else {
                 progress = categorizedResult.getProgress();
             }

@@ -7,9 +7,11 @@ import java.util.concurrent.ExecutionException;
 
 public interface OutputComponent {
 
-    void addToQueue(CruncherResult cruncherResult);
+    void addCruncherResult(CruncherResult cruncherResult);
 
     CalculationResult poll(String resultName) throws ExecutionException, InterruptedException;
 
     CalculationResult take(String resultName) throws ExecutionException, InterruptedException;
+
+    void enqueueSumRequest(OutputComponentSumRequest outputComponentSumRequest);
 }

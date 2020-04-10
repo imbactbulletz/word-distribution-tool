@@ -2,6 +2,7 @@ package ui.controller;
 
 import app.component.cruncher.typealias.CalculationResult;
 import app.component.output.OutputCache;
+import app.component.output.OutputComponentSumRequest;
 import app.component.output.result.OutputResult;
 import app.global.Executors;
 import javafx.collections.ListChangeListener;
@@ -10,10 +11,13 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
 import ui.model.output.UIOutputComponent;
 import ui.util.DialogUtil;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 public class OutputController {
@@ -52,11 +56,14 @@ public class OutputController {
 
     private void initResultsListView() {
         resultsListView.setItems(UI_OUTPUT_COMPONENT.getOutputResults());
+        resultsListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         resultsListView.getItems().addListener((ListChangeListener<? super OutputResult>) (change) -> {
             if (change.getList().size() > 0) {
                 singleResultButton.setDisable(false);
+                sumResultButton.setDisable(false);
                 selectResultListViewItemIfNoneSelected();
             } else {
+                sumResultButton.setDisable(true);
                 sumResultButton.setDisable(true);
             }
         });
@@ -105,5 +112,27 @@ public class OutputController {
 
     private void initSumResultButton() {
         sumResultButton.setDisable(true);
+        sumResultButton.setOnAction((e) -> {
+            Optional<String> dialogResult = DialogUtil.showTextInputDialog("Enter sum name", "Enter a unique name for sum", "sum");
+            dialogResult.ifPresent((sumName) -> {
+                if(sumName.isBlank()) {
+                   DialogUtil.showErrorDialog("Invalid name", "You have to enter a name.");
+                }
+
+                if (UI_OUTPUT_COMPONENT.getOutputResults().contains(new OutputResult(sumName, 0, null))) {
+                    DialogUtil.showErrorDialog("Name not unique", "Name of the sum must be unique.");
+                } else {
+                    List<OutputResult> outputResults = resultsListView.getSelectionModel().getSelectedItems();
+                    if (outputResults != null && outputResults.size() > 0) {
+                        List<String> resultNames = new ArrayList<>();
+                        for (OutputResult outputResult : outputResults) {
+                            resultNames.add(outputResult.getResultName());
+                        }
+
+                        UI_OUTPUT_COMPONENT.getOutputComponent().enqueueSumRequest(new OutputComponentSumRequest(sumName, resultNames));
+                    }
+                }
+            });
+        });
     }
 }

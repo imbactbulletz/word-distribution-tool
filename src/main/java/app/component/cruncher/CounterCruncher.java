@@ -43,7 +43,7 @@ public class CounterCruncher implements CruncherComponent, Runnable {
                 Future<CalculationResult> cruncherResultFuture = Executors.CRUNCHER.submit(new CounterCruncherWorker(this, arity, fileInfo.getFileName(), 0, fileInfo.getContent(), false));
                 CruncherResult cruncherResult = new CruncherResult(fileInfo.getFileName() + " - arity" + arity, cruncherResultFuture);
                 for (OutputComponent outputComponent: linkedOutputComponents) {
-                    outputComponent.addToQueue(cruncherResult);
+                    outputComponent.addCruncherResult(cruncherResult);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -74,7 +74,7 @@ public class CounterCruncher implements CruncherComponent, Runnable {
 
     private void poisonLinkedOutputComponents() {
         for(OutputComponent outputComponent: linkedOutputComponents) {
-            outputComponent.addToQueue(new CruncherResultPoison());
+            outputComponent.addCruncherResult(new CruncherResultPoison());
         }
     }
 }
