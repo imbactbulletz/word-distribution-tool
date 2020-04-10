@@ -3,6 +3,7 @@ package ui.controller;
 import app.component.output.OutputCache;
 import app.component.output.result.OutputResult;
 import app.global.Executors;
+import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
 import javafx.scene.control.Button;
@@ -30,19 +31,28 @@ public class OutputController {
     @FXML
     private Button sumResultButton;
 
+    public void init() {
+        initResultsListView();
+        initButtons();
+    }
 
     public static void updateOutputResult(OutputResult outputResult) {
         List<OutputResult> outputResults = UI_OUTPUT_COMPONENT.getOutputResults();
         int indexOfOutputResult = outputResults.indexOf(outputResult);
         if (indexOfOutputResult != -1) {
-           outputResults.set(indexOfOutputResult, outputResult);
+            outputResults.set(indexOfOutputResult, outputResult);
         } else {
             outputResults.add(outputResult);
         }
     }
 
-    public void init() {
-        initResultsListView();
+    private void initButtons() {
+        singleResultButton.setDisable(true);
+        sumResultButton.setDisable(true);
+        resultsListView.getItems().addListener((ListChangeListener<? super OutputResult>) (change) -> {
+            singleResultButton.setDisable(change.getList().size() == 0);
+            sumResultButton.setDisable(change.getList().size() == 0);
+        });
     }
 
     private void initResultsListView() {
