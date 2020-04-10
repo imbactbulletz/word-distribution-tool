@@ -1,6 +1,7 @@
 package ui.controller;
 
 import app.component.cruncher.CruncherComponent;
+import app.component.cruncher.typealias.CruncherResultPoison;
 import app.component.input.InputComponent;
 import app.global.Executors;
 import javafx.application.Platform;
@@ -56,6 +57,16 @@ public class MainController {
         INPUT_CONTROLLER.terminateFileInputComponents();
 
         Thread shutdownThread = new Thread(() -> {
+            if((!INPUT_CONTROLLER.hasActiveInputs() && !CRUNCHER_CONTROLLER.hasActiveCrunchers()) || (INPUT_CONTROLLER.hasActiveInputs() && !CRUNCHER_CONTROLLER.hasLinkedCrunchers())) {
+                OutputController.UI_OUTPUT_COMPONENT.getOutputComponent().addCruncherResult(new CruncherResultPoison());
+                shutdownPoolAndWait(Executors.OUTPUT, 5, TimeUnit.SECONDS);
+                CRUNCHER_CONTROLLER.shutdownUnlinkedCrunchers();
+                shutdownPoolAndWait(Executors.CRUNCHER, 5, TimeUnit.SECONDS);
+            } else if (!CRUNCHER_CONTROLLER.hasLinkedCrunchers()) {
+                CRUNCHER_CONTROLLER.shutdownUnlinkedCrunchers();
+                shutdownPoolAndWait(Executors.CRUNCHER, 5, TimeUnit.SECONDS);
+            }
+
            shutdownPoolAndWait(Executors.COMPONENT, 5, TimeUnit.SECONDS);
            shutdownPoolAndWait(Executors.INPUT, 5, TimeUnit.SECONDS);
            shutdownPoolAndWait(Executors.CRUNCHER, 5, TimeUnit.SECONDS);

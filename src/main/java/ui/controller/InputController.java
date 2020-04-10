@@ -108,7 +108,7 @@ public class InputController {
                 if (newSelection.getInputComponent() instanceof FileInput) {
                     directoriesListView.setItems(FXCollections.observableList(((FileInput) newSelection.getInputComponent()).getDirectories()));
 
-                    if(directoriesListView.getItems().size() > 0) {
+                    if (directoriesListView.getItems().size() > 0) {
                         directoriesListView.getSelectionModel().select(directoriesListView.getItems().size() - 1);
                         directoriesListView.refresh();
                     }
@@ -219,7 +219,7 @@ public class InputController {
                 Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
 
                 File directory = DialogUtil.showDirectoryChooser(absoluteDiskPath, stage);
-                if(directory == null) {
+                if (directory == null) {
                     return;
                 }
 
@@ -280,12 +280,16 @@ public class InputController {
     }
 
     public void terminateFileInputComponents() {
-        for(UIInputComponent uiInputComponent: model.getUiInputComponents()) {
+        for (UIInputComponent uiInputComponent : model.getUiInputComponents()) {
             uiInputComponent.getInputComponent().shutdown();
 
-            for(CruncherComponent cruncherComponent: uiInputComponent.getInputComponent().getCruncherComponents()) {
+            for (CruncherComponent cruncherComponent : uiInputComponent.getInputComponent().getCruncherComponents()) {
                 cruncherComponent.queueWork(new FileInfoPoison(null, null, null));
             }
         }
+    }
+
+    public boolean hasActiveInputs() {
+        return model.getUiInputComponents().size() != 0;
     }
 }

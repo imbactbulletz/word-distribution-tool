@@ -3,6 +3,8 @@ package ui.controller;
 import app.component.cruncher.CounterCruncher;
 import app.component.cruncher.CruncherComponent;
 import app.component.cruncher.CruncherJobStatus;
+import app.component.input.FileInfo;
+import app.component.input.FileInfoPoison;
 import app.component.input.InputComponent;
 import app.global.Executors;
 import javafx.beans.property.SimpleObjectProperty;
@@ -168,5 +170,26 @@ public class CruncherController {
 
     public void setOnLinkUnlinkButtonClickedListener(Consumer<UICruncherComponent> onLinkUnlinkButtonClickedListener) {
         this.onLinkUnlinkButtonClickedListener = onLinkUnlinkButtonClickedListener;
+    }
+
+    public boolean hasLinkedCrunchers() {
+        for(UICruncherComponent uiCruncherComponent: model.getCruncherComponents()) {
+            if (uiCruncherComponent.getLinkedUiInputComponents().size() != 0) return true;
+        }
+
+        return false;
+    }
+
+    public boolean hasActiveCrunchers() {
+        return model.getCruncherComponents().size() != 0;
+    }
+
+    public void shutdownUnlinkedCrunchers() {
+        FileInfoPoison poison = new FileInfoPoison(null, null, null);
+        for(UICruncherComponent uiCruncherComponent: model.getCruncherComponents()) {
+            if(uiCruncherComponent.getLinkedUiInputComponents().size() == 0) {
+                uiCruncherComponent.getCruncherComponent().queueWork(poison);
+            }
+        }
     }
 }
