@@ -39,7 +39,7 @@ public class NotifyUIWorkerImpl implements Runnable, NotifyUIWorker {
             double progress;
             if (categorizedResult.getResultType() == OutputResultType.SINGLE) {
                 if (categorizedResult.getCalculationResultFuture() != null) {
-                    progress = categorizedResult.getCalculationResultFuture().isDone() ? 100 : 0;
+                    progress = categorizedResult.getCalculationResultFuture().isDone() ? 1 : 0;
                 } else {
                     progress = 0;
                 }
