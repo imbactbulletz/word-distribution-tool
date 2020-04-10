@@ -31,12 +31,6 @@ public class OutputController {
     @FXML
     private Button sumResultButton;
 
-    public void init() {
-        initSingleResultButton();
-        initSumResultButton();
-        initResultsListView();
-    }
-
     public static void updateOutputResult(OutputResult outputResult) {
         List<OutputResult> outputResults = UI_OUTPUT_COMPONENT.getOutputResults();
         int indexOfOutputResult = outputResults.indexOf(outputResult);
@@ -47,11 +41,21 @@ public class OutputController {
         }
     }
 
+    public void init() {
+        initSingleResultButton();
+        initSumResultButton();
+        initResultsListView();
+    }
+
     private void initResultsListView() {
         resultsListView.setItems(UI_OUTPUT_COMPONENT.getOutputResults());
         resultsListView.getItems().addListener((ListChangeListener<? super OutputResult>) (change) -> {
-            singleResultButton.setDisable(change.getList().size() == 0);
-            sumResultButton.setDisable(change.getList().size() == 0);
+            if (change.getList().size() > 0) {
+                singleResultButton.setDisable(false);
+                selectResultListViewItemIfNoneSelected();
+            } else {
+                sumResultButton.setDisable(true);
+            }
         });
 
         resultsListView.setCellFactory(callback -> new ListCell<>() {
@@ -66,6 +70,13 @@ public class OutputController {
                 }
             }
         });
+    }
+
+    private void selectResultListViewItemIfNoneSelected() {
+        OutputResult outputResult = resultsListView.getSelectionModel().getSelectedItem();
+        if (outputResult == null) {
+           resultsListView.getSelectionModel().select(resultsListView.getItems().size() -1);
+        }
     }
 
     private void initSingleResultButton() {
