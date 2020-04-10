@@ -1,5 +1,6 @@
 package ui.controller;
 
+import app.component.cruncher.typealias.CalculationResult;
 import app.component.output.OutputCache;
 import app.component.output.result.OutputResult;
 import app.global.Executors;
@@ -10,8 +11,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import ui.model.output.UIOutputComponent;
+import ui.util.DialogUtil;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class OutputController {
     public static final UIOutputComponent UI_OUTPUT_COMPONENT;
@@ -75,13 +78,29 @@ public class OutputController {
     private void selectResultListViewItemIfNoneSelected() {
         OutputResult outputResult = resultsListView.getSelectionModel().getSelectedItem();
         if (outputResult == null) {
-           resultsListView.getSelectionModel().select(resultsListView.getItems().size() -1);
+            resultsListView.getSelectionModel().select(resultsListView.getItems().size() - 1);
         }
     }
 
     private void initSingleResultButton() {
         singleResultButton.setDisable(true);
+        singleResultButton.setOnAction((e) -> {
+            OutputResult selectedOutputResult = resultsListView.getSelectionModel().getSelectedItem();
+            if (selectedOutputResult != null) {
+                try {
+                    CalculationResult calculationResult = UI_OUTPUT_COMPONENT.getOutputComponent().poll(selectedOutputResult.getResultName());
 
+                    if (calculationResult == null) {
+                        DialogUtil.showErrorDialog("Result not ready", "Result is not ready yet.");
+                    } else {
+                        // TODO sort and display
+                        System.out.println(calculationResult.size());
+                    }
+                } catch (ExecutionException | InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
     }
 
     private void initSumResultButton() {
