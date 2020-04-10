@@ -127,7 +127,6 @@ public class OutputController {
                                 int val = atomicInteger.incrementAndGet();
                                 if (val % Config.SORT_PROGRESS_LIMIT_RATE == 0) {
                                     double progress = ((double) val) / totalComparisons;
-                                    System.out.println(progress);
                                     Platform.runLater(() -> {
                                         progressBar.setVisible(true);
                                         progressBar.setProgress(progress);
