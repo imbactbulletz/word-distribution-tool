@@ -8,10 +8,7 @@ import app.global.Executors;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.SelectionMode;
+import javafx.scene.control.*;
 import ui.model.output.UIOutputComponent;
 import ui.util.DialogUtil;
 
@@ -37,6 +34,8 @@ public class OutputController {
     private Button singleResultButton;
     @FXML
     private Button sumResultButton;
+    @FXML
+    private ProgressBar progressBar;
 
     public static void updateOutputResult(OutputResult outputResult) {
         List<OutputResult> outputResults = UI_OUTPUT_COMPONENT.getOutputResults();
@@ -46,6 +45,11 @@ public class OutputController {
         } else {
             outputResults.add(outputResult);
         }
+    }
+
+    public void updateProgressBar(double value) {
+        progressBar.setVisible(true);
+        progressBar.setProgress(value);
     }
 
     public void init() {

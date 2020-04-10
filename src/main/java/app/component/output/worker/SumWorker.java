@@ -4,6 +4,8 @@ import app.component.cruncher.typealias.CalculationResult;
 import app.component.output.OutputComponentSumRequest;
 import app.component.output.result.CategorizedResult;
 import app.component.output.result.typealias.Cache;
+import javafx.application.Platform;
+import ui.controller.MainController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +36,10 @@ public class SumWorker implements Callable<CalculationResult> {
 
         for(int i = 0; i < calculationResultFutures.size(); i++) {
             CalculationResult calculationResult = calculationResultFutures.get(i).get();
-            categorizedResult.setProgress((double)i / calculationResultFutures.size() * 100);
+            double progress = (double)(i+1) / calculationResultFutures.size() * 100;
+            categorizedResult.setProgress(progress);
+            notifyUIToUpdateProgressBar(progress);
+            System.out.println(progress);
             result.combineWith(calculationResult);
         }
 
@@ -48,5 +53,9 @@ public class SumWorker implements Callable<CalculationResult> {
             calculationResultFutures.add(categorizedResult.getCalculationResultFuture());
         }
         return calculationResultFutures;
+    }
+
+    private void notifyUIToUpdateProgressBar(double value) {
+        Platform.runLater(() -> MainController.OUTPUT_CONTROLLER.updateProgressBar(value));
     }
 }
