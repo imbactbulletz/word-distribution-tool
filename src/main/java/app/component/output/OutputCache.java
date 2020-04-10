@@ -1,5 +1,6 @@
 package app.component.output;
 
+import app.component.cruncher.typealias.CalculationResult;
 import app.component.cruncher.typealias.CruncherResult;
 import app.component.cruncher.typealias.CruncherResultPoison;
 import app.component.output.result.CategorizedResult;
@@ -9,6 +10,8 @@ import app.component.output.worker.NotifyUIWorker;
 import app.component.output.worker.NotifyUIWorkerImpl;
 import app.global.Executors;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class OutputCache implements OutputComponent, Runnable {
@@ -56,6 +59,23 @@ public class OutputCache implements OutputComponent, Runnable {
         } else {
             cache.put(cruncherResult.getJobName(), new CategorizedResult(cruncherResult.getCalculationResult(), OutputResultType.SINGLE));
         }
+    }
+
+    @Override
+    public CalculationResult poll(String resultName) throws ExecutionException, InterruptedException {
+        CategorizedResult categorizedResult = cache.get(resultName);
+
+        if(categorizedResult.getCalculationResultFuture().isDone()) {
+            return categorizedResult.getCalculationResultFuture().get();
+        }
+
+        return null;
+    }
+
+    @Override
+    public CalculationResult take(String resultName) throws ExecutionException, InterruptedException {
+        CategorizedResult categorizedResult = cache.get(resultName);
+        return categorizedResult.getCalculationResultFuture().get();
     }
 
     public Cache getCache() {
